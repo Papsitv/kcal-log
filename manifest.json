@@ -1,13 +1,25 @@
 {
+  "id": "/kcal-log/",
   "name": "Kcal Log",
   "short_name": "Kcal Log",
-  "description": "Personal daily calorie tracker",
-  "start_url": "./index.html",
-  "scope": "./",
+  "description": "A simple and light personal daily calorie tracker.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "/kcal-log/index.html",
+  "scope": "/kcal-log/",
   "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
   "orientation": "portrait",
   "background_color": "#FAF7F2",
   "theme_color": "#1E2622",
+  "categories": [
+    "health",
+    "lifestyle",
+    "medical"
+  ],
   "icons": [
     {
       "src": "icon-192.png",
@@ -20,6 +32,30 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Kcal Log Home Screen"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Kcal Log Desktop View"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Open Calorie Tracker",
+      "short_name": "Tracker",
+      "description": "Log your calories quickly",
+      "url": "/kcal-log/index.html"
     }
   ]
 }
