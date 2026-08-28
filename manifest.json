@@ -32,11 +32,7 @@
   ],
   "scope_extensions": [
     {
-      "origin": "https://papsitv.github.io"
-    },
-    {
-      "type": "origin",
-      "origin": "*.github.io"
+      "origin": "papsitv.github.io"
     }
   ],
   "file_handlers": [
