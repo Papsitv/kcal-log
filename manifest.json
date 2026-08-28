@@ -5,20 +5,86 @@
   "description": "A simple and light personal daily calorie tracker.",
   "lang": "en",
   "dir": "ltr",
-  "start_url": "/kcal-log/index.html",
-  "scope": "/kcal-log/",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "standalone",
-    "minimal-ui"
+    "minimal-ui",
+    "window-controls-overlay",
+    "tabbed"
   ],
   "orientation": "portrait",
   "background_color": "#FAF7F2",
   "theme_color": "#1E2622",
   "categories": [
     "health",
-    "lifestyle",
-    "medical"
+    "lifestyle"
+  ],
+  "iarc_rating_id": "00000000-0000-0000-0000-000000000000",
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.papsitv.kcallog",
+      "id": "com.papsitv.kcallog"
+    }
+  ],
+  "scope_extensions": [
+    {
+      "origin": "https://papsitv.github.io"
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "./index.html",
+      "accept": {
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+kcal",
+      "url": "./index.html?type=%s"
+    }
+  ],
+  "share_target": {
+    "action": "./index.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "note_taking": {
+    "new_note_url": "./index.html"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "widgets": [
+    {
+      "name": "Kcal Log Widget",
+      "short_name": "Kcal Widget",
+      "description": "Quick view of your calories",
+      "tag": "kcal-widget",
+      "template": "widget-template",
+      "ms_ac_template": "widget-template.json",
+      "data": "widget-data.json",
+      "type": "text/html",
+      "screenshots": [
+        {
+          "src": "icon-512.png",
+          "sizes": "512x512",
+          "label": "Widget View"
+        }
+      ]
+    }
   ],
   "icons": [
     {
@@ -55,7 +121,7 @@
       "name": "Open Calorie Tracker",
       "short_name": "Tracker",
       "description": "Log your calories quickly",
-      "url": "/kcal-log/index.html"
+      "url": "./index.html"
     }
   ]
 }
