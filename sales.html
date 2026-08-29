@@ -1,115 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Kcal Log — Simple Calorie Tracker for Android</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calorie Tracker for Android | ZelVen Labs</title>
   <style>
-    :root {
-      --primary: #10B981;
-      --primary-dark: #059669;
-      --bg: #0F172A;
-      --card-bg: #1E293B;
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
-    .card {
-      background-color: var(--card-bg);
-      border-radius: 16px;
-      max-width: 420px;
-      width: 100%;
-      padding: 32px 24px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-      border: 1px solid #334155;
-      text-align: center;
-    }
-    .app-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 20px;
-      margin-bottom: 16px;
-    }
-    h1 { font-size: 1.75rem; margin-bottom: 8px; font-weight: 700; }
-    .tagline { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px; }
-    .price-box {
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid var(--primary);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 24px;
-    }
-    .price { font-size: 2rem; font-weight: 800; color: var(--primary); }
-    .price-sub { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
-    .features { text-align: left; margin-bottom: 28px; }
-    .feature-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-    .feature-item span { margin-right: 10px; font-size: 1.1rem; }
-    .btn-buy {
-      display: block;
-      width: 100%;
-      background-color: var(--primary);
-      color: #000000;
-      font-weight: 700;
-      font-size: 1.1rem;
-      padding: 16px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background-color 0.2s ease;
-    }
-    .btn-buy:hover { background-color: var(--primary-dark); color: #ffffff; }
-    .badge {
-      display: inline-block;
-      background: #334155;
-      color: #38BDF8;
-      font-size: 0.75rem;
-      font-weight: 600;
-      padding: 4px 10px;
-      border-radius: 9999px;
-      margin-bottom: 12px;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #F8FAFC; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+    .card { background: #1E293B; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 440px; padding: 32px; text-align: center; border: 1px solid #334155; }
+    .badge { background: #0284C7; color: #ffffff; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
+    h1 { font-size: 24px; margin: 16px 0 8px; color: #F8FAFC; }
+    p.subtitle { color: #94A3B8; font-size: 14px; margin-bottom: 20px; }
+    .price-box { margin: 20px 0; padding: 16px; background: #0F172A; border-radius: 12px; border: 1px solid #334155; }
+    .price { font-size: 32px; font-weight: 700; color: #10B981; }
+    .price-sub { font-size: 12px; color: #94A3B8; margin-top: 4px; }
+    .qr-container { margin: 16px 0; background: #ffffff; padding: 16px; border-radius: 12px; display: inline-block; }
+    .qr-container img { width: 200px; height: 200px; display: block; border-radius: 8px; }
+    .payment-details { font-size: 14px; color: #CBD5E1; margin-bottom: 16px; }
+    .payment-details strong { color: #10B981; }
+    .btn-download { display: block; width: 100%; background: #10B981; color: #0F172A; font-weight: 700; font-size: 16px; padding: 14px; border-radius: 10px; text-decoration: none; transition: background 0.2s ease; margin-top: 20px; }
+    .btn-download:hover { background: #059669; }
+    .note { font-size: 12px; color: #64748B; margin-top: 16px; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <img src="icon-192.png" alt="Kcal Log Icon" class="app-icon">
-    <span class="badge">Version 1.1 Updated</span>
-    <h1>Kcal Log</h1>
-    <p class="tagline">Simple, privacy-focused calorie tracking for your daily fitness goals.</p>
+    <span class="badge">ZelVen Labs</span>
+    <h1>Calorie Tracker</h1>
+    <p class="subtitle">Fast, lightweight Android app to log daily meals offline.</p>
 
     <div class="price-box">
-      <div class="price">₱29.00</div>
-      <div class="price-sub">One-time payment • Lifetime access • No ads</div>
+      <div class="price">₱29</div>
+      <div class="price-sub">One-time payment • Lifetime access</div>
     </div>
 
-    <div class="features">
-      <div class="feature-item"><span>📝</span> Log meals, daily goals, & target intake</div>
-      <div class="feature-item"><span>📊</span> <b>New:</b> Daily, Weekly, & Monthly summaries</div>
-      <div class="feature-item"><span>⚡</span> 100% Offline — data stays on your phone</div>
-      <div class="feature-item"><span>📱</span> Lightweight Android APK (1 MB)</div>
+    <!-- Replace src below with your uploaded QR Code image or link -->
+    <div class="qr-container">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=000201010211" alt="GCash / Maya QR Code" />
     </div>
 
-    <!-- Payment Redirect Button -->
-    <a href="https://dev.xen.to/r_XGG_2y" class="btn-buy" id="buyBtn">
-      Buy Now (GCash, Maya, Card)
+    <div class="payment-details">
+      <p>Send <strong>₱29</strong> via GCash or Maya</p>
+      <p>Mobile: <strong>09XX XXX XXXX</strong></p>
+    </div>
+
+    <!-- Direct link to download page -->
+    <a href="https://papsitv.github.io/kcal-log/download.html" class="btn-download">
+      I've Sent Payment — Go to Download
     </a>
+
+    <p class="note">Please send exact payment before downloading.</p>
   </div>
 
 </body>
