@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download App — Payment Required</title>
+  <title>kcal-log — Download</title>
   <style>
     :root {
       --bg-color: #0d1117;
@@ -14,6 +14,7 @@
       --accent-color: #238636;
       --accent-hover: #2ea043;
       --warning-color: #d29922;
+      --error-color: #f85149;
     }
 
     * {
@@ -44,24 +45,33 @@
       text-align: center;
     }
 
-    .badge {
-      display: inline-block;
-      background-color: rgba(210, 153, 34, 0.15);
-      color: var(--warning-color);
-      border: 1px solid rgba(210, 153, 34, 0.4);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 20px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .app-icon {
+      width: 64px;
+      height: 64px;
+      background-color: #21262d;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
     }
 
     h1 {
       font-size: 1.5rem;
       color: #ffffff;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
+    }
+
+    .version-tag {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-bottom: 20px;
     }
 
     p {
@@ -69,35 +79,6 @@
       font-size: 0.95rem;
       line-height: 1.6;
       margin-bottom: 24px;
-    }
-
-    .info-box {
-      background-color: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 0.875rem;
-      color: var(--text-main);
-      text-align: left;
-      margin-bottom: 24px;
-    }
-
-    .info-box ul {
-      list-style-type: none;
-    }
-
-    .info-box li {
-      margin-bottom: 8px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .info-box li:last-child {
-      margin-bottom: 0;
-    }
-
-    .info-box span.label {
-      color: var(--text-muted);
     }
 
     .btn {
@@ -119,55 +100,172 @@
       background-color: var(--accent-hover);
     }
 
-    .footer-text {
-      margin-top: 20px;
-      font-size: 0.8rem;
+    /* Overlay / Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+      text-align: left;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .badge {
+      display: inline-block;
+      background-color: rgba(248, 81, 73, 0.15);
+      color: var(--error-color);
+      border: 1px solid rgba(248, 81, 73, 0.4);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .modal h2 {
+      font-size: 1.25rem;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .modal-body {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .info-box {
+      background-color: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+    }
+
+    .info-box ul {
+      list-style: none;
+    }
+
+    .info-box li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .info-box li:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-box .label {
       color: var(--text-muted);
     }
 
-    .footer-text a {
-      color: #58a6ff;
-      text-decoration: none;
+    .modal-actions {
+      display: flex;
+      gap: 12px;
     }
 
-    .footer-text a:hover {
-      text-decoration: underline;
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.05);
     }
   </style>
 </head>
 <body>
 
+  <!-- Main Download Card -->
   <div class="card">
-    <span class="badge">402 Payment Required</span>
-    <h1>Payment Verification Pending</h1>
-    <p>
-      Access to download the release binary is restricted. A one-time purchase is required to receive access to <strong>kcal-log</strong>.
-    </p>
+    <div class="app-icon">🔥</div>
+    <h1>kcal-log</h1>
+    <span class="version-tag">v1.1 (Android Package)</span>
+    <p>Track your daily calories and macros efficiently with a streamlined experience.</p>
+    
+    <button class="btn" id="download-btn">Download APK</button>
+  </div>
 
-    <div class="info-box">
-      <ul>
-        <li>
-          <span class="label">Product:</span>
-          <strong>kcal-log (Android Package)</strong>
-        </li>
-        <li>
-          <span class="label">Access Model:</span>
-          <strong>One-Time Payment</strong>
-        </li>
-        <li>
-          <span class="label">Status:</span>
-          <span style="color: var(--warning-color); font-weight: 600;">Unpaid</span>
-        </li>
-      </ul>
-    </div>
+  <!-- Technical "Payment Required" Popup Modal -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+      <span class="badge">HTTP 402 Payment Required</span>
+      <h2>Access Restricted</h2>
+      <div class="modal-body">
+        Download authorization failed. A verified one-time purchase is required to download and access <strong>kcal-log v1.1</strong>.
+      </div>
 
-    <!-- Replace the href below with your payment link (e.g., Stripe, PayPal, Lemon Squeezy) -->
-    <a href="#" class="btn" id="pay-button">Complete One-Time Payment</a>
+      <div class="info-box">
+        <ul>
+          <li><span class="label">Package:</span> <strong>app-release.apk</strong></li>
+          <li><span class="label">Access Type:</span> <strong>One-Time Purchase</strong></li>
+          <li><span class="label">Status:</span> <strong style="color: var(--error-color);">Unverified / Unpaid</strong></li>
+        </ul>
+      </div>
 
-    <div class="footer-text">
-      Already paid? <a href="#" id="support-link">Contact support</a> for download authorization.
+      <div class="modal-actions">
+        <!-- Replace '#' with your actual payment checkout link -->
+        <a href="#" class="btn" style="text-align: center;">Pay Once & Unlock</a>
+        <button class="btn-secondary" id="close-modal">Close</button>
+      </div>
     </div>
   </div>
+
+  <script>
+    const downloadBtn = document.getElementById('download-btn');
+    const paymentModal = document.getElementById('payment-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    // Intercept click to prevent the browser 404 page
+    downloadBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      paymentModal.style.display = 'flex';
+    });
+
+    closeModal.addEventListener('click', () => {
+      paymentModal.style.display = 'none';
+    });
+
+    // Close modal on background overlay click
+    paymentModal.addEventListener('click', (e) => {
+      if (e.target === paymentModal) {
+        paymentModal.style.display = 'none';
+      }
+    });
+  </script>
 
 </body>
 </html>
