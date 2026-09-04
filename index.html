@@ -237,20 +237,120 @@
       </div>
 
       <div class="modal-actions">
-        <!-- Replace '#' with your actual payment checkout link -->
-        <a href="#" class="btn" style="text-align: center;">Pay Once & Unlock</a>
+        <!-- Pay button: JavaScript will open a checkout view (GCash) -->
+        <a href="#" id="pay-once-btn" class="btn" style="text-align: center;">Pay Once & Unlock</a>
         <button class="btn-secondary" id="close-modal">Close</button>
       </div>
     </div>
   </div>
 
+  <!-- Checkout / GCash view (inside same overlay, toggled by JS) -->
+  <div class="modal-overlay" id="checkout-modal" style="display:none;">
+    <div class="modal">
+      <h2>Buy kcal-log (One-Time)</h2>
+      <div class="modal-body" id="checkout-body">
+        <p class="payment-details">Send payment to the following GCash account. After you pay, use the "Request Unlock" button to notify the seller, or enter the unlock code you receive to unlock the download immediately.</p>
+        <div class="info-box">
+          <ul>
+            <li><span class="label">GCash Number:</span> <strong id="gcash-number">09171234567</strong></li>
+            <li><span class="label">Amount:</span> <strong id="gcash-amount">PHP 199</strong></li>
+          </ul>
+          <div style="margin-top:12px; text-align:center;">
+            <img id="gcash-qr" alt="GCash QR" src="" style="width:180px; height:180px; border-radius:8px;" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label class="label">Your name (for verification)</label>
+          <input id="payer-name" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="Full name" />
+          <label class="label" style="margin-top:8px; display:block;">Phone used (GCash)</label>
+          <input id="payer-phone" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="e.g. 0917xxxxxxx" />
+          <label class="label" style="margin-top:8px; display:block;">Transaction reference (optional)</label>
+          <input id="payer-ref" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="GCash reference / note" />
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:12px;">
+          <button class="btn" id="notify-seller">Request Unlock (Notify Seller)</button>
+          <button class="btn-secondary" id="enter-unlock">I already have an unlock code</button>
+        </div>
+
+        <div id="unlock-section" style="display:none; margin-top:12px;">
+          <label class="label">Enter unlock code</label>
+          <input id="unlock-code-input" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="Unlock code" />
+          <div style="display:flex; gap:8px; margin-top:8px;"><button class="btn" id="verify-unlock">Verify Code</button><button class="btn-secondary" id="cancel-unlock">Cancel</button></div>
+        </div>
+
+        <p id="checkout-note" style="color:var(--text-muted); font-size:0.85rem; margin-top:12px;">Tip: After you send payment, copy your payer details and press "Request Unlock" — the seller will reply with an unlock code after verification.</p>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn-secondary" id="checkout-close">Close</button></div>
+    </div>
+  </div>
+
   <script>
+    // Configuration (change these values for your real account / amount)
+    const TRIAL_DURATION_MS = 24 * 60 * 60 * 1000; // 1 day trial
+    const GCASH_NUMBER = '09206176536'; // seller-provided GCash number
+    const GCASH_AMOUNT = 'PHP 29'; // change to your price
+
+    // Elements
     const downloadBtn = document.getElementById('download-btn');
     const paymentModal = document.getElementById('payment-modal');
     const closeModal = document.getElementById('close-modal');
+    const payOnceBtn = document.getElementById('pay-once-btn');
 
-    // Intercept click to prevent the browser 404 page
+    const checkoutModal = document.getElementById('checkout-modal');
+    const checkoutClose = document.getElementById('checkout-close');
+    const gcashNumberEl = document.getElementById('gcash-number');
+    const gcashAmountEl = document.getElementById('gcash-amount');
+    const gcashQrEl = document.getElementById('gcash-qr');
+    const payerName = document.getElementById('payer-name');
+    const payerPhone = document.getElementById('payer-phone');
+    const payerRef = document.getElementById('payer-ref');
+    const notifySellerBtn = document.getElementById('notify-seller');
+    const enterUnlockBtn = document.getElementById('enter-unlock');
+    const unlockSection = document.getElementById('unlock-section');
+    const verifyUnlockBtn = document.getElementById('verify-unlock');
+    const cancelUnlockBtn = document.getElementById('cancel-unlock');
+    const unlockInput = document.getElementById('unlock-code-input');
+
+    // Trial & payment state helpers
+    function startTrialIfNeeded() {
+      if (!localStorage.getItem('kcal_trial_start')) {
+        localStorage.setItem('kcal_trial_start', Date.now().toString());
+      }
+    }
+
+    function isTrialActive() {
+      const start = parseInt(localStorage.getItem('kcal_trial_start') || '0', 10);
+      if (!start) return false;
+      return Date.now() < (start + TRIAL_DURATION_MS);
+    }
+
+    function isPaid() {
+      return localStorage.getItem('kcal_paid') === 'true';
+    }
+
+    function setPaid() {
+      localStorage.setItem('kcal_paid', 'true');
+      localStorage.setItem('kcal_paid_time', Date.now().toString());
+    }
+
+    function updateUI() {
+      if (isPaid() || isTrialActive()) {
+        downloadBtn.textContent = 'Download APK';
+      } else {
+        downloadBtn.textContent = 'Download APK';
+      }
+    }
+
+    // Wire download behavior: allow download during trial or after paid, otherwise show payment modal
     downloadBtn.addEventListener('click', (e) => {
+      if (isPaid() || isTrialActive()) {
+        // Proceed to download the APK file (ensure app-release.apk is hosted alongside this page)
+        window.location.href = 'app-release.apk';
+        return;
+      }
+      // not paid and trial expired -> show payment modal
       e.preventDefault();
       paymentModal.style.display = 'flex';
     });
@@ -259,12 +359,89 @@
       paymentModal.style.display = 'none';
     });
 
-    // Close modal on background overlay click
     paymentModal.addEventListener('click', (e) => {
-      if (e.target === paymentModal) {
-        paymentModal.style.display = 'none';
+      if (e.target === paymentModal) paymentModal.style.display = 'none';
+    });
+
+    // Pay button opens checkout modal with GCash info
+    payOnceBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      paymentModal.style.display = 'none';
+      // populate values
+      gcashNumberEl.textContent = GCASH_NUMBER;
+      gcashAmountEl.textContent = GCASH_AMOUNT;
+      // Use hosted QR image if available (falls back to generated QR)
+      gcashQrEl.src = 'https://raw.githubusercontent.com/Papsitv/kcal-log/main/myQR.png';
+      checkoutModal.style.display = 'flex';
+      // prefill payer phone if trial data exists (best-effort)
+      if (localStorage.getItem('payer_phone')) payerPhone.value = localStorage.getItem('payer_phone');
+    });
+
+    checkoutClose.addEventListener('click', () => {
+      checkoutModal.style.display = 'none';
+    });
+
+    checkoutModal.addEventListener('click', (e) => {
+      if (e.target === checkoutModal) checkoutModal.style.display = 'none';
+    });
+
+    notifySellerBtn.addEventListener('click', () => {
+      const name = payerName.value.trim();
+      const phone = payerPhone.value.trim();
+      const ref = payerRef.value.trim();
+      // Save phone locally for convenience next time
+      if (phone) localStorage.setItem('payer_phone', phone);
+      // Send a server-side request so admin UI will show a pending request (and optionally email alert)
+      fetch('/api/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone, ref, amount: GCASH_AMOUNT }) })
+        .then(r => r.json()).then(j => {
+          if (j.ok) {
+            alert('Request submitted — the seller will verify payment and send an unlock code.');
+            checkoutModal.style.display = 'none';
+          } else {
+            alert('Failed to submit request. Please email the seller instead.');
+          }
+        }).catch(e => { console.error(e); alert('Network error — try emailing the seller if it fails.'); });
+    });
+
+    enterUnlockBtn.addEventListener('click', () => {
+      unlockSection.style.display = 'block';
+    });
+
+    cancelUnlockBtn.addEventListener('click', () => {
+      unlockSection.style.display = 'none';
+    });
+
+    verifyUnlockBtn.addEventListener('click', async () => {
+      const code = (unlockInput.value || '').trim();
+      if (!code) {
+        alert('Please enter the unlock code you received from the seller.');
+        return;
+      }
+      try {
+        const resp = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.ok) {
+          setPaid();
+          checkoutModal.style.display = 'none';
+          alert('Payment confirmed — download unlocked.');
+          updateUI();
+          window.location.href = 'app-release.apk';
+        } else {
+          alert(data.error || 'Unlock code not recognized. Please contact the seller.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network error while verifying code. Try again or contact the seller.');
       }
     });
+
+    // Initialize trial and UI on page load
+    startTrialIfNeeded();
+    updateUI();
   </script>
 
 </body>
