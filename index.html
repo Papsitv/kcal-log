@@ -3,446 +3,511 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>kcal-log — Download</title>
+  <title>Kcal Log App</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#F7F4EE">
   <style>
     :root {
-      --bg-color: #0d1117;
-      --card-bg: #161b22;
-      --border-color: #30363d;
-      --text-main: #c9d1d9;
-      --text-muted: #8b949e;
-      --accent-color: #238636;
-      --accent-hover: #2ea043;
-      --warning-color: #d29922;
-      --error-color: #f85149;
+      --bg: #F7F4EE;
+      --card-bg: #FFFFFF;
+      --dark-card: #222B27;
+      --dark-btn: #2B2823;
+      --accent: #B87A1B;
+      --text: #2B2823;
+      --text-muted: #7A756C;
+      --border: #E8E3D8;
+      --input-bg: #FAF8F5;
     }
 
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px 15px;
       display: flex;
       justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
     }
 
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
+    .app-container {
       width: 100%;
       max-width: 480px;
-      padding: 32px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    /* HEADER & NAV */
+    .app-subtitle {
+      font-size: 0.75rem;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .app-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin: 0 0 16px 0;
+      color: var(--text);
+    }
+
+    .top-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
       text-align: center;
     }
 
-    .app-icon {
-      width: 64px;
-      height: 64px;
-      background-color: #21262d;
-      border: 1px solid var(--border-color);
+    .nav-btn.active {
+      background: var(--dark-btn);
+      color: #FFFFFF;
+      border-color: var(--dark-btn);
+    }
+
+    /* VIEWS */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    /* CARDS */
+    .card {
+      background: var(--card-bg);
       border-radius: 16px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.8rem;
+      padding: 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
     }
 
-    h1 {
-      font-size: 1.5rem;
-      color: #ffffff;
-      margin-bottom: 8px;
+    .card-dark {
+      background: var(--dark-card);
+      color: #FFFFFF;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
     }
 
-    .version-tag {
-      display: inline-block;
+    .card-dark .sub-text {
+      color: #8A9E95;
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .card-dark .total-kcal {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #72E2B0;
+      margin: 6px 0;
+    }
+
+    .card-dark .total-kcal span {
+      font-size: 1rem;
+      color: #8A9E95;
+      font-weight: 400;
+    }
+
+    /* FORM ELEMENTS */
+    label {
+      display: block;
       font-size: 0.8rem;
       color: var(--text-muted);
-      background-color: rgba(255, 255, 255, 0.05);
-      padding: 2px 8px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      margin-bottom: 24px;
-    }
-
-    .btn {
-      display: block;
-      width: 100%;
-      background-color: var(--accent-color);
-      color: #ffffff;
       font-weight: 600;
-      padding: 12px 16px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: background-color 0.2s ease;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-    }
-
-    .btn:hover {
-      background-color: var(--accent-hover);
-    }
-
-    /* Overlay / Modal Styling */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.75);
-      backdrop-filter: blur(4px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      padding: 20px;
-    }
-
-    .modal {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 440px;
-      padding: 28px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
-      text-align: left;
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .badge {
-      display: inline-block;
-      background-color: rgba(248, 81, 73, 0.15);
-      color: var(--error-color);
-      border: 1px solid rgba(248, 81, 73, 0.4);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .modal h2 {
-      font-size: 1.25rem;
-      color: #ffffff;
-      margin-bottom: 8px;
-    }
-
-    .modal-body {
-      color: var(--text-muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-      margin-bottom: 20px;
-    }
-
-    .info-box {
-      background-color: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 0.85rem;
-      margin-bottom: 20px;
-    }
-
-    .info-box ul {
-      list-style: none;
-    }
-
-    .info-box li {
-      display: flex;
-      justify-content: space-between;
       margin-bottom: 6px;
     }
 
-    .info-box li:last-child {
-      margin-bottom: 0;
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 12px;
+      outline: none;
     }
 
-    .info-box .label {
-      color: var(--text-muted);
+    input:focus, select:focus {
+      border-color: var(--accent);
     }
 
-    .modal-actions {
+    .row {
       display: flex;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .btn-secondary {
-      background-color: transparent;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 10px 14px;
-      border-radius: 6px;
+    .btn-main {
+      width: 100%;
+      padding: 14px;
+      background: var(--dark-btn);
+      color: #FFFFFF;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      font-weight: 500;
     }
 
-    .btn-secondary:hover {
-      background-color: rgba(255, 255, 255, 0.05);
+    .btn-accent {
+      background: var(--accent);
+      color: #FFFFFF;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* FOOD GUIDE USDA ITEMS */
+    .food-item {
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+
+    .food-item:last-child {
+      border-bottom: none;
+    }
+
+    .food-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      font-size: 0.72rem;
+      background: #F0EADF;
+      color: var(--accent);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 30px 15px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
 
-  <!-- Main Download Card -->
-  <div class="card">
-    <div class="app-icon">🔥</div>
-    <h1>kcal-log</h1>
-    <span class="version-tag">v1.1 (Android Package)</span>
-    <p>Track your daily calories and macros efficiently with a streamlined experience.</p>
-    
-    <button class="btn" id="download-btn">Download APK</button>
-  </div>
+  <div class="app-container" id="mainApp">
+    <div class="app-subtitle">FOOD LOG</div>
+    <h1 class="app-title">Kcal Tracker</h1>
 
-  <!-- Technical "Payment Required" Popup Modal -->
-  <div class="modal-overlay" id="payment-modal">
-    <div class="modal">
-      <span class="badge">HTTP 402 Payment Required</span>
-      <h2>Access Restricted</h2>
-      <div class="modal-body">
-        Download authorization failed. A verified one-time purchase is required to download and access <strong>kcal-log v1.1</strong>.
-      </div>
-
-      <div class="info-box">
-        <ul>
-          <li><span class="label">Package:</span> <strong>app-release.apk</strong></li>
-          <li><span class="label">Access Type:</span> <strong>One-Time Purchase</strong></li>
-          <li><span class="label">Status:</span> <strong style="color: var(--error-color);">Unverified / Unpaid</strong></li>
-        </ul>
-      </div>
-
-      <div class="modal-actions">
-        <!-- Pay button: JavaScript will open a checkout view (GCash) -->
-        <a href="#" id="pay-once-btn" class="btn" style="text-align: center;">Pay Once & Unlock</a>
-        <button class="btn-secondary" id="close-modal">Close</button>
-      </div>
+    <!-- TOP TAB NAVIGATION -->
+    <div class="top-nav">
+      <button class="nav-btn active" onclick="switchTab('logView', this)">Log</button>
+      <button class="nav-btn" onclick="switchTab('summaryView', this)">Summary</button>
+      <button class="nav-btn" onclick="switchTab('profileView', this)">Profile</button>
+      <button class="nav-btn" onclick="switchTab('foodView', this)">Food guide</button>
     </div>
-  </div>
 
-  <!-- Checkout / GCash view (inside same overlay, toggled by JS) -->
-  <div class="modal-overlay" id="checkout-modal" style="display:none;">
-    <div class="modal">
-      <h2>Buy kcal-log (One-Time)</h2>
-      <div class="modal-body" id="checkout-body">
-        <p class="payment-details">Send payment to the following GCash account. After you pay, use the "Request Unlock" button to notify the seller, or enter the unlock code you receive to unlock the download immediately.</p>
-        <div class="info-box">
-          <ul>
-            <li><span class="label">GCash Number:</span> <strong id="gcash-number">09171234567</strong></li>
-            <li><span class="label">Amount:</span> <strong id="gcash-amount">PHP 199</strong></li>
-          </ul>
-          <div style="margin-top:12px; text-align:center;">
-            <img id="gcash-qr" alt="GCash QR" src="" style="width:180px; height:180px; border-radius:8px;" />
+    <!-- LOG VIEW -->
+    <div id="logView" class="view active">
+      <div class="card-dark">
+        <div class="sub-text">Selected Day's Total</div>
+        <div class="total-kcal"><span id="totalKcal">0</span> <span>kcal</span></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top: 0; color: var(--accent); font-size: 1rem;">Add entry</h3>
+        <div class="row">
+          <div style="flex: 2;">
+            <label>Food / item</label>
+            <input type="text" id="foodName" placeholder="e.g. Chicken adobo">
+          </div>
+          <div style="flex: 1;">
+            <label>Kcal</label>
+            <input type="number" id="calories" placeholder="0">
           </div>
         </div>
-
-        <div style="margin-top:12px;">
-          <label class="label">Your name (for verification)</label>
-          <input id="payer-name" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="Full name" />
-          <label class="label" style="margin-top:8px; display:block;">Phone used (GCash)</label>
-          <input id="payer-phone" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="e.g. 0917xxxxxxx" />
-          <label class="label" style="margin-top:8px; display:block;">Transaction reference (optional)</label>
-          <input id="payer-ref" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="GCash reference / note" />
-        </div>
-
-        <div style="display:flex; gap:8px; margin-top:12px;">
-          <button class="btn" id="notify-seller">Request Unlock (Notify Seller)</button>
-          <button class="btn-secondary" id="enter-unlock">I already have an unlock code</button>
-        </div>
-
-        <div id="unlock-section" style="display:none; margin-top:12px;">
-          <label class="label">Enter unlock code</label>
-          <input id="unlock-code-input" type="text" style="width:100%; padding:8px; margin-top:6px; border-radius:6px; border:1px solid var(--border-color); background:transparent; color:var(--text-main);" placeholder="Unlock code" />
-          <div style="display:flex; gap:8px; margin-top:8px;"><button class="btn" id="verify-unlock">Verify Code</button><button class="btn-secondary" id="cancel-unlock">Cancel</button></div>
-        </div>
-
-        <p id="checkout-note" style="color:var(--text-muted); font-size:0.85rem; margin-top:12px;">Tip: After you send payment, copy your payer details and press "Request Unlock" — the seller will reply with an unlock code after verification.</p>
+        <button class="btn-main" onclick="addLog()">Add to log</button>
       </div>
-      <div style="display:flex; gap:8px; margin-top:12px;"><button class="btn-secondary" id="checkout-close">Close</button></div>
+
+      <div class="app-subtitle" style="margin-top: 20px;">Today's Entries</div>
+      <div id="logList" class="card" style="padding: 10px 18px;"></div>
     </div>
+
+    <!-- SUMMARY VIEW -->
+    <div id="summaryView" class="view">
+      <div class="card">
+        <h3 style="margin-top:0;">Daily Summary</h3>
+        <p id="summaryText" style="color: var(--text-muted);">Loading summary...</p>
+      </div>
+    </div>
+
+    <!-- PROFILE VIEW -->
+    <div id="profileView" class="view">
+      <div class="card">
+        <h3 style="margin-top:0; color: var(--text);">Your Profile & Goal</h3>
+        <label>Weight (kg)</label>
+        <input type="number" id="userWeight" placeholder="e.g. 70">
+        <label>Height (cm)</label>
+        <input type="number" id="userHeight" placeholder="e.g. 162.56">
+        <label>Age</label>
+        <input type="number" id="userAge" placeholder="e.g. 30">
+        <label>Gender</label>
+        <select id="userGender">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+
+        <label>Daily Activity Level</label>
+        <select id="userActivity">
+          <option value="1.2">Sedentary (Little or no exercise)</option>
+          <option value="1.375" selected>Lightly Active (1 hr walking pad / light exercise)</option>
+          <option value="1.55">Moderately Active (Moderate exercise 3-5 days/wk)</option>
+          <option value="1.725">Very Active (Hard exercise 6-7 days/wk)</option>
+          <option value="1.9">Extra Active (Very hard physical work / training)</option>
+        </select>
+
+        <button class="btn-main" onclick="saveProfile()">Calculate Target</button>
+        <div id="profileResult" style="margin-top: 15px; font-size: 0.9rem;"></div>
+      </div>
+    </div>
+
+    <!-- FOOD GUIDE VIEW (USDA INTEGRATION) -->
+    <div id="foodView" class="view">
+      <div class="card">
+        <h3 style="margin-top:0; color: var(--text);">USDA Nutrition Search</h3>
+        <div class="row" style="margin-bottom: 0;">
+          <input type="text" id="usdaQuery" placeholder="Search USDA (e.g., Rice, Pork)" style="margin-bottom: 0;">
+          <button class="btn-accent" onclick="searchUSDA()">Search</button>
+        </div>
+        <div id="usdaResults" style="margin-top: 15px;"></div>
+      </div>
+    </div>
+
   </div>
 
   <script>
-    // Configuration (change these values for your real account / amount)
-    const TRIAL_DURATION_MS = 24 * 60 * 60 * 1000; // 1 day trial
-    const GCASH_NUMBER = '09206176536'; // seller-provided GCash number
-    const GCASH_AMOUNT = 'PHP 29'; // change to your price
+    const USDA_API_KEY = 'sJQhPvt4Udtu4nx7RyG5iIEEMp8HcK0ZN3ju9aJJ';
 
-    // Elements
-    const downloadBtn = document.getElementById('download-btn');
-    const paymentModal = document.getElementById('payment-modal');
-    const closeModal = document.getElementById('close-modal');
-    const payOnceBtn = document.getElementById('pay-once-btn');
+    // 7-DAY TRIAL RESTRICTION LOGIC
+    const TRIAL_DAYS = 7;
+    const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
-    const checkoutModal = document.getElementById('checkout-modal');
-    const checkoutClose = document.getElementById('checkout-close');
-    const gcashNumberEl = document.getElementById('gcash-number');
-    const gcashAmountEl = document.getElementById('gcash-amount');
-    const gcashQrEl = document.getElementById('gcash-qr');
-    const payerName = document.getElementById('payer-name');
-    const payerPhone = document.getElementById('payer-phone');
-    const payerRef = document.getElementById('payer-ref');
-    const notifySellerBtn = document.getElementById('notify-seller');
-    const enterUnlockBtn = document.getElementById('enter-unlock');
-    const unlockSection = document.getElementById('unlock-section');
-    const verifyUnlockBtn = document.getElementById('verify-unlock');
-    const cancelUnlockBtn = document.getElementById('cancel-unlock');
-    const unlockInput = document.getElementById('unlock-code-input');
+    function checkTrialStatus() {
+      let installDate = localStorage.getItem('kcal_install_date');
+      if (!installDate) {
+        installDate = Date.now();
+        localStorage.setItem('kcal_install_date', installDate);
+      }
 
-    // Trial & payment state helpers
-    function startTrialIfNeeded() {
-      if (!localStorage.getItem('kcal_trial_start')) {
-        localStorage.setItem('kcal_trial_start', Date.now().toString());
+      const timeElapsed = Date.now() - parseInt(installDate, 10);
+      if (timeElapsed > TRIAL_MS) {
+        showPaywall();
       }
     }
 
-    function isTrialActive() {
-      const start = parseInt(localStorage.getItem('kcal_trial_start') || '0', 10);
-      if (!start) return false;
-      return Date.now() < (start + TRIAL_DURATION_MS);
+    function showPaywall() {
+      document.body.innerHTML = `
+        <div style="max-width: 420px; margin: 40px auto; text-align: center; font-family: sans-serif; padding: 20px;">
+          <div style="font-size: 3rem; margin-bottom: 10px;">🔒</div>
+          <h2 style="color: #2B2823; margin-bottom: 8px;">Your 7-Day Free Trial Has Ended</h2>
+          <p style="color: #7A756C; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
+            Hope you enjoyed using <strong>Kcal Tracker</strong> with full USDA Food Guide integration! Unlock lifetime access today with a single one-time payment.
+          </p>
+          <a href="sales.html" style="text-decoration: none;">
+            <button style="
+              width: 100%; 
+              padding: 16px; 
+              background: #B87A1B; 
+              color: #FFFFFF; 
+              border: none; 
+              border-radius: 12px; 
+              font-size: 1rem; 
+              font-weight: bold; 
+              cursor: pointer;
+              box-shadow: 0 4px 12px rgba(184, 122, 27, 0.3);
+            ">
+              Pay Once & Download APK 🚀
+            </button>
+          </a>
+          <p style="color: #7A756C; font-size: 0.8rem; margin-top: 16px;">
+            Lifetime Access • No Subscriptions • USDA Database Included
+          </p>
+        </div>
+      `;
     }
 
-    function isPaid() {
-      return localStorage.getItem('kcal_paid') === 'true';
+    function switchTab(viewId, btn) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      btn.classList.add('active');
     }
 
-    function setPaid() {
-      localStorage.setItem('kcal_paid', 'true');
-      localStorage.setItem('kcal_paid_time', Date.now().toString());
+    function getLogs() {
+      return JSON.parse(localStorage.getItem('kcal_logs') || '[]');
     }
 
-    function updateUI() {
-      if (isPaid() || isTrialActive()) {
-        downloadBtn.textContent = 'Download APK';
+    function addLog(name, kcal) {
+      const foodName = name || document.getElementById('foodName').value;
+      const calories = kcal || parseInt(document.getElementById('calories').value);
+
+      if (!foodName || isNaN(calories)) {
+        alert('Please enter a valid food name and calories.');
+        return;
+      }
+
+      const logs = getLogs();
+      logs.push({ name: foodName, kcal: calories, date: new Date().toLocaleDateString() });
+      localStorage.setItem('kcal_logs', JSON.stringify(logs));
+
+      if (!name) {
+        document.getElementById('foodName').value = '';
+        document.getElementById('calories').value = '';
+      }
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const logs = getLogs();
+      const today = new Date().toLocaleDateString();
+      const list = document.getElementById('logList');
+      list.innerHTML = '';
+      let total = 0;
+
+      const todayLogs = logs.filter(item => item.date === today);
+
+      if (todayLogs.length === 0) {
+        list.innerHTML = '<div class="empty-state">No entries yet for this day. Add your first meal above.</div>';
       } else {
-        downloadBtn.textContent = 'Download APK';
+        todayLogs.forEach(item => {
+          total += item.kcal;
+          const div = document.createElement('div');
+          div.className = 'food-item';
+          div.innerHTML = `<div style="display:flex; justify-content:space-between;"><strong>${item.name}</strong><span>${item.kcal} kcal</span></div>`;
+          list.appendChild(div);
+        });
+      }
+
+      document.getElementById('totalKcal').textContent = total;
+      document.getElementById('summaryText').textContent = `Total calories logged today: ${total} kcal across ${todayLogs.length} entry/entries.`;
+    }
+
+    function saveProfile() {
+      const weight = parseFloat(document.getElementById('userWeight').value);
+      const height = parseFloat(document.getElementById('userHeight').value);
+      const age = parseInt(document.getElementById('userAge').value);
+      const gender = document.getElementById('userGender').value;
+      const activityMultiplier = parseFloat(document.getElementById('userActivity').value);
+
+      if (!weight || !height || !age) {
+        alert('Please fill in weight, height, and age.');
+        return;
+      }
+
+      let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+      bmr += (gender === 'male') ? 5 : -161;
+
+      const maintenance = Math.round(bmr * activityMultiplier);
+      const weightLossTarget = maintenance - 500;
+
+      document.getElementById('profileResult').innerHTML = 
+        `<strong>BMR:</strong> ${Math.round(bmr)} kcal/day<br>` +
+        `<strong>Maintenance Target:</strong> ~${maintenance} kcal/day<br>` +
+        `<strong style="color: var(--accent);">Weight Loss Target (-500 kcal):</strong> ~${weightLossTarget} kcal/day`;
+    }
+
+    async function searchUSDA() {
+      const query = document.getElementById('usdaQuery').value;
+      const resultsContainer = document.getElementById('usdaResults');
+
+      if (!query) return;
+      resultsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Searching USDA database...</p>';
+
+      try {
+        const response = await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(query)}&pageSize=5&api_key=${USDA_API_KEY}`);
+        const data = await response.json();
+
+        if (!data.foods || data.foods.length === 0) {
+          resultsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">No matching foods found.</p>';
+          return;
+        }
+
+        resultsContainer.innerHTML = '';
+        data.foods.forEach(food => {
+          const getNutrient = (id) => food.foodNutrients.find(n => n.nutrientId === id)?.value || 0;
+          const kcal = getNutrient(1008);
+          const protein = getNutrient(1003);
+          const fat = getNutrient(1004);
+          const fiber = getNutrient(1079);
+
+          const div = document.createElement('div');
+          div.className = 'food-item';
+          div.innerHTML = `
+            <div class="food-title">${food.description}</div>
+            <div class="badge-row">
+              <span class="badge">${kcal} kcal/100g</span>
+              <span class="badge">P: ${protein}g</span>
+              <span class="badge">F: ${fat}g</span>
+              <span class="badge">Fib: ${fiber}g</span>
+            </div>
+            <div class="row" style="margin-bottom:0;">
+              <input type="number" id="grams-${food.fdcId}" placeholder="Grams (e.g. 150)" style="margin-bottom:0;">
+              <button class="btn-accent" style="padding: 8px 14px; font-size: 0.85rem;" onclick="addUsdaFood('${food.description.replace(/'/g, "\\'")}', ${kcal}, ${food.fdcId})">Add</button>
+            </div>
+          `;
+          resultsContainer.appendChild(div);
+        });
+
+      } catch (err) {
+        resultsContainer.innerHTML = '<p style="color:var(--text-muted); font-size:0.9rem;">Error connecting to USDA API.</p>';
       }
     }
 
-    // Wire download behavior: allow download during trial or after paid, otherwise show payment modal
-    downloadBtn.addEventListener('click', (e) => {
-      if (isPaid() || isTrialActive()) {
-        // Proceed to download the APK file (ensure app-release.apk is hosted alongside this page)
-        window.location.href = 'app-release.apk';
-        return;
-      }
-      // not paid and trial expired -> show payment modal
-      e.preventDefault();
-      paymentModal.style.display = 'flex';
-    });
+    function addUsdaFood(name, kcalPer100g, fdcId) {
+      const gramsInput = document.getElementById(`grams-${fdcId}`).value;
+      const grams = parseFloat(gramsInput) || 100;
+      const calculatedKcal = Math.round((grams / 100) * kcalPer100g);
+      addLog(`${name} (${grams}g)`, calculatedKcal);
+      switchTab('logView', document.querySelectorAll('.nav-btn')[0]);
+    }
 
-    closeModal.addEventListener('click', () => {
-      paymentModal.style.display = 'none';
-    });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js');
+    }
 
-    paymentModal.addEventListener('click', (e) => {
-      if (e.target === paymentModal) paymentModal.style.display = 'none';
-    });
-
-    // Pay button opens checkout modal with GCash info
-    payOnceBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      paymentModal.style.display = 'none';
-      // populate values
-      gcashNumberEl.textContent = GCASH_NUMBER;
-      gcashAmountEl.textContent = GCASH_AMOUNT;
-      // Use hosted QR image if available (falls back to generated QR)
-      gcashQrEl.src = 'https://raw.githubusercontent.com/Papsitv/kcal-log/main/myQR.png';
-      checkoutModal.style.display = 'flex';
-      // prefill payer phone if trial data exists (best-effort)
-      if (localStorage.getItem('payer_phone')) payerPhone.value = localStorage.getItem('payer_phone');
-    });
-
-    checkoutClose.addEventListener('click', () => {
-      checkoutModal.style.display = 'none';
-    });
-
-    checkoutModal.addEventListener('click', (e) => {
-      if (e.target === checkoutModal) checkoutModal.style.display = 'none';
-    });
-
-    notifySellerBtn.addEventListener('click', () => {
-      const name = payerName.value.trim();
-      const phone = payerPhone.value.trim();
-      const ref = payerRef.value.trim();
-      // Save phone locally for convenience next time
-      if (phone) localStorage.setItem('payer_phone', phone);
-      // Send a server-side request so admin UI will show a pending request (and optionally email alert)
-      fetch('/api/request', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, phone, ref, amount: GCASH_AMOUNT }) })
-        .then(r => r.json()).then(j => {
-          if (j.ok) {
-            alert('Request submitted — the seller will verify payment and send an unlock code.');
-            checkoutModal.style.display = 'none';
-          } else {
-            alert('Failed to submit request. Please email the seller instead.');
-          }
-        }).catch(e => { console.error(e); alert('Network error — try emailing the seller if it fails.'); });
-    });
-
-    enterUnlockBtn.addEventListener('click', () => {
-      unlockSection.style.display = 'block';
-    });
-
-    cancelUnlockBtn.addEventListener('click', () => {
-      unlockSection.style.display = 'none';
-    });
-
-    verifyUnlockBtn.addEventListener('click', async () => {
-      const code = (unlockInput.value || '').trim();
-      if (!code) {
-        alert('Please enter the unlock code you received from the seller.');
-        return;
-      }
-      try {
-        const resp = await fetch('/api/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code })
-        });
-        const data = await resp.json();
-        if (resp.ok && data.ok) {
-          setPaid();
-          checkoutModal.style.display = 'none';
-          alert('Payment confirmed — download unlocked.');
-          updateUI();
-          window.location.href = 'app-release.apk';
-        } else {
-          alert(data.error || 'Unlock code not recognized. Please contact the seller.');
-        }
-      } catch (err) {
-        console.error(err);
-        alert('Network error while verifying code. Try again or contact the seller.');
-      }
-    });
-
-    // Initialize trial and UI on page load
-    startTrialIfNeeded();
-    updateUI();
+    checkTrialStatus();
+    renderLogs();
   </script>
-
 </body>
 </html>
