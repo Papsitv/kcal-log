@@ -14,10 +14,10 @@
     .price-box { margin: 20px 0; padding: 16px; background: #0F172A; border-radius: 12px; border: 1px solid #334155; }
     .price { font-size: 32px; font-weight: 700; color: #10B981; }
     .price-sub { font-size: 12px; color: #94A3B8; margin-top: 4px; }
-    .qr-container { margin: 16px 0; background: #ffffff; padding: 16px; border-radius: 12px; display: inline-block; }
-    .qr-container img { width: 200px; height: 200px; display: block; border-radius: 8px; }
-    .payment-details { font-size: 14px; color: #CBD5E1; margin-bottom: 16px; }
+    .payment-details { background: #0F172A; border: 1px dashed #10B981; padding: 14px; border-radius: 12px; font-size: 14px; color: #CBD5E1; margin: 16px 0; text-align: center; line-height: 1.5; }
     .payment-details strong { color: #10B981; }
+    .qr-container { margin: 10px 0 16px 0; background: #ffffff; padding: 16px; border-radius: 12px; display: inline-block; }
+    .qr-container img { width: 200px; height: 200px; display: block; border-radius: 8px; }
     .btn-download { display: block; width: 100%; background: #10B981; color: #0F172A; font-weight: 700; font-size: 16px; padding: 14px; border-radius: 10px; text-decoration: none; transition: background 0.2s ease; margin-top: 20px; }
     .btn-download:hover { background: #059669; }
     .note { font-size: 12px; color: #64748B; margin-top: 16px; }
@@ -28,21 +28,23 @@
   <div class="card">
     <span class="badge">ZelVen Labs</span>
     <h1>Calorie Tracker</h1>
-    <p class="subtitle">Fast, lightweight Android app to log daily meals offline.</p>
+    <p class="subtitle">Fast, lightweight Android app to log daily meals offline with USDA Food Guide integration.</p>
 
     <div class="price-box">
       <div class="price">₱29</div>
       <div class="price-sub">One-time payment • Lifetime access</div>
     </div>
 
-    <!-- GCash / Maya QR Code Image -->
-    <div class="qr-container">
-      <img src="https://raw.githubusercontent.com/Papsitv/kcal-log/main/myQR.png" alt="GCash" />
-    </div>
-
+    <!-- GCASH ACCOUNT DETAILS PLACED AT THE TOP OF THE QR CODE -->
     <div class="payment-details">
       <p>Send <strong>₱29</strong> via GCash or Maya</p>
       <p>Mobile: <strong>09206176536</strong></p>
+      <p>Account Name: <strong>DENNIS L.</strong></p>
+    </div>
+
+    <!-- GCash QR Code Image -->
+    <div class="qr-container">
+      <img src="myQR.png" alt="GCash QR Code" />
     </div>
 
     <!-- Direct link to download page -->
