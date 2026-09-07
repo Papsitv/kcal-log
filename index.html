@@ -227,6 +227,37 @@
 <body>
 
   <div class="app-container" id="mainApp">
+    
+    <!-- TRIAL STATUS BANNER -->
+    <div id="trialBanner" style="
+      background: #FFFBEB; 
+      border: 1px solid #FCD34D; 
+      color: #92400E; 
+      padding: 10px 14px; 
+      border-radius: 12px; 
+      margin-bottom: 16px; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      font-size: 0.85rem; 
+      font-weight: 600;
+    ">
+      <div>
+        <span style="
+          background: #F59E0B; 
+          color: #FFFFFF; 
+          font-size: 0.7rem; 
+          padding: 2px 6px; 
+          border-radius: 4px; 
+          text-transform: uppercase; 
+          font-weight: 800; 
+          margin-right: 6px;
+        ">TRIAL MODE</span>
+        <span id="trialCountdown">Calculating...</span>
+      </div>
+      <a href="sales.html" style="color: #B87A1B; text-decoration: underline; font-weight: 700; font-size: 0.8rem;">Upgrade</a>
+    </div>
+
     <div class="app-subtitle">FOOD LOG</div>
     <h1 class="app-title">Kcal Tracker</h1>
 
@@ -319,7 +350,7 @@
   <script>
     const USDA_API_KEY = 'sJQhPvt4Udtu4nx7RyG5iIEEMp8HcK0ZN3ju9aJJ';
 
-    // 7-DAY TRIAL RESTRICTION LOGIC
+    // 7-DAY TRIAL RESTRICTION & LIVE COUNTDOWN LOGIC
     const TRIAL_DAYS = 7;
     const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
@@ -330,10 +361,28 @@
         localStorage.setItem('kcal_install_date', installDate);
       }
 
-      const timeElapsed = Date.now() - parseInt(installDate, 10);
-      if (timeElapsed > TRIAL_MS) {
-        showPaywall();
+      function updateTimer() {
+        const timeElapsed = Date.now() - parseInt(installDate, 10);
+        const timeRemaining = TRIAL_MS - timeElapsed;
+
+        if (timeRemaining <= 0) {
+          showPaywall();
+          return;
+        }
+
+        const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
+
+        const countdownElement = document.getElementById('trialCountdown');
+        if (countdownElement) {
+          countdownElement.textContent = `${days}d ${hours}h ${minutes}m ${seconds}s left`;
+        }
       }
+
+      updateTimer();
+      setInterval(updateTimer, 1000);
     }
 
     function showPaywall() {
