@@ -311,12 +311,12 @@
   </div>
 
   <div class="app-container" id="mainApp">
+    <!-- TRIAL STATUS BANNER / MAIN APP BODY CONTENT -->
+  </div>
 
-    <!-- TRIAL STATUS BANNER -->
   <script>
     const USDA_API_KEY = 'sJQhPvt4Udtu4nx7RyG5iIEEMp8HcK0ZN3ju9aJJ';
 
-    // 7-DAY TRIAL RESTRICTION & LIVE COUNTDOWN LOGIC
     // 1. ANTI-SHARE DEVICE BINDING (Works on both Trial & Full Versions)
     function validateDeviceBinding() {
       const currentSignature = navigator.userAgent + screen.width + "x" + screen.height;
@@ -332,9 +332,9 @@
             <p style="color: #7A756C; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
               This instance of <strong>Kcal Tracker</strong> was registered on another device and cannot be shared.
             </p>
-            <a href="sales.html" style="text-decoration: none;">
+            <a href="https://pm.link/org-6z51H3v3b6TE6rktHCkdcMBC/99KO8RK" style="text-decoration: none;">
               <button style="width: 100%; padding: 14px; background: #B87A1B; color: #FFF; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                Get Your Own License (₱29)
+                Get Your Own License (₱79)
               </button>
             </a>
           </div>
@@ -344,7 +344,7 @@
       return true;
     }
 
-    // 2. READ ME ONBOARDING GUIDE (Auto-opens on first launch for all versions)
+    // 2. READ ME ONBOARDING GUIDE
     function checkReadMeStatus() {
       const hasSeenReadMe = localStorage.getItem('kcal_readme_seen');
       if (!hasSeenReadMe) {
@@ -362,7 +362,6 @@
     const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
     function checkTrialStatus() {
-      // Check if this build is the paid version flag
       if (localStorage.getItem('kcal_is_full_version') === 'true') {
         const banner = document.getElementById('trialBanner');
         if (banner) banner.style.display = 'none';
@@ -372,17 +371,22 @@
       let installDate = localStorage.getItem('kcal_install_date');
       if (!installDate) {
         installDate = Date.now();
-@@ -555,8 +686,12 @@
+        localStorage.setItem('kcal_install_date', installDate);
+      }
+    }
+
+    // SERVICE WORKER REGISTRATION
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('service-worker.js');
     }
 
-    checkTrialStatus();
-    renderLogs();
-    // INITIALIZATION RUNS FOR BOTH VERSIONS
+    // SINGLE INITIALIZATION RUN FOR ALL FEATURES
     if (validateDeviceBinding()) {
       checkTrialStatus();
       checkReadMeStatus();
-      renderLogs();
+      if (typeof renderLogs === 'function') {
+        renderLogs();
+      }
     }
   </script>
 </body>
