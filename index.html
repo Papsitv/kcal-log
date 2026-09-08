@@ -222,9 +222,93 @@
       border: 1px dashed var(--border);
       border-radius: 12px;
     }
+
+    /* AUTO-OPEN READ ME MODAL STYLES */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.85);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .guide-step {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .guide-step h4 {
+      margin: 0 0 4px 0;
+      color: var(--accent);
+      font-size: 0.95rem;
+    }
+
+    .guide-step p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
+
+  <!-- READ ME ONBOARDING MODAL (Trial & Full Version) -->
+  <div id="readMeModal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-title">👋 Welcome to Kcal Tracker!</div>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+        Here is a quick guide to help you get started with tracking your daily calories effectively:
+      </p>
+
+      <div class="guide-step">
+        <h4>1. Set Up Your Daily Goal</h4>
+        <p>Go to the <strong>Profile</strong> tab, enter your height, weight, age, and activity level to compute your recommended daily calorie deficit.</p>
+      </div>
+
+      <div class="guide-step">
+        <h4>2. Log Daily Meals</h4>
+        <p>Use the <strong>Log</strong> tab to record what you eat throughout the day. Enter food names and calorie counts manually.</p>
+      </div>
+
+      <div class="guide-step">
+        <h4>3. Search USDA Database</h4>
+        <p>Use the <strong>Food Guide</strong> tab to look up exact official nutrition data and auto-calculate calories based on gram weight.</p>
+      </div>
+
+      <div class="guide-step">
+        <h4>4. Track Progress</h4>
+        <p>Check the <strong>Summary</strong> tab anytime to see your daily progress and intake history.</p>
+      </div>
+
+      <button class="btn-main" onclick="closeReadMeModal()">Got It, Let's Start!</button>
+    </div>
+  </div>
 
   <div class="app-container" id="mainApp">
     
@@ -350,11 +434,58 @@
   <script>
     const USDA_API_KEY = 'sJQhPvt4Udtu4nx7RyG5iIEEMp8HcK0ZN3ju9aJJ';
 
-    // 7-DAY TRIAL RESTRICTION & LIVE COUNTDOWN LOGIC
+    // 1. ANTI-SHARE DEVICE BINDING (Works on both Trial & Full Versions)
+    function validateDeviceBinding() {
+      const currentSignature = navigator.userAgent + screen.width + "x" + screen.height;
+      let storedSignature = localStorage.getItem('kcal_device_sig');
+
+      if (!storedSignature) {
+        localStorage.setItem('kcal_device_sig', currentSignature);
+      } else if (storedSignature !== currentSignature) {
+        document.body.innerHTML = `
+          <div style="max-width: 420px; margin: 60px auto; text-align: center; font-family: sans-serif; padding: 20px;">
+            <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+            <h2 style="color: #2B2823; margin-bottom: 8px;">License Violation Detected</h2>
+            <p style="color: #7A756C; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
+              This instance of <strong>Kcal Tracker</strong> was registered on another device and cannot be shared.
+            </p>
+            <a href="sales.html" style="text-decoration: none;">
+              <button style="width: 100%; padding: 14px; background: #B87A1B; color: #FFF; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                Get Your Own License (₱29)
+              </button>
+            </a>
+          </div>
+        `;
+        return false;
+      }
+      return true;
+    }
+
+    // 2. READ ME ONBOARDING GUIDE (Auto-opens on first launch for all versions)
+    function checkReadMeStatus() {
+      const hasSeenReadMe = localStorage.getItem('kcal_readme_seen');
+      if (!hasSeenReadMe) {
+        document.getElementById('readMeModal').style.display = 'flex';
+      }
+    }
+
+    function closeReadMeModal() {
+      localStorage.setItem('kcal_readme_seen', 'true');
+      document.getElementById('readMeModal').style.display = 'none';
+    }
+
+    // 3. 7-DAY TRIAL RESTRICTION & LIVE COUNTDOWN
     const TRIAL_DAYS = 7;
     const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
     function checkTrialStatus() {
+      // Check if this build is the paid version flag
+      if (localStorage.getItem('kcal_is_full_version') === 'true') {
+        const banner = document.getElementById('trialBanner');
+        if (banner) banner.style.display = 'none';
+        return;
+      }
+
       let installDate = localStorage.getItem('kcal_install_date');
       if (!installDate) {
         installDate = Date.now();
@@ -555,8 +686,12 @@
       navigator.serviceWorker.register('service-worker.js');
     }
 
-    checkTrialStatus();
-    renderLogs();
+    // INITIALIZATION RUNS FOR BOTH VERSIONS
+    if (validateDeviceBinding()) {
+      checkTrialStatus();
+      checkReadMeStatus();
+      renderLogs();
+    }
   </script>
 </body>
 </html>
