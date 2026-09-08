@@ -3,131 +3,64 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Get Kcal Log App</title>
+  <title>Kcal Log - Upgrade to Pro</title>
   <style>
-    :root {
-      --bg: #F7F4EE;
-      --card-bg: #FFFFFF;
-      --dark-btn: #2B2823;
-      --accent: #B87A1B;
-      --text: #2B2823;
-      --text-muted: #7A756C;
-      --border: #E8E3D8;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
     body {
-      background-color: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
       margin: 0;
-      padding: 40px 15px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
     }
-
-    .sales-card {
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 30px 24px;
-      max-width: 420px;
-      width: 100%;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    .card {
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px 24px;
+      max-width: 400px;
+      width: 90%;
       text-align: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     }
-
-    .price-badge {
-      display: inline-block;
-      background: #FEF3C7;
-      color: #92400E;
-      font-weight: 800;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin: 0 0 10px 0;
-    }
-
-    p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-
-    .btn-download {
+    h1 { font-size: 1.8rem; margin-bottom: 8px; color: #ffffff; }
+    .price { font-size: 2.5rem; font-weight: bold; color: #38bdf8; margin: 16px 0; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.5; }
+    .btn-buy {
       display: block;
       width: 100%;
-      padding: 16px;
-      background: var(--accent);
-      color: #FFFFFF;
+      background-color: #2563eb;
+      color: #ffffff;
       text-decoration: none;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 700;
-      box-shadow: 0 4px 12px rgba(184, 122, 27, 0.3);
-      transition: background 0.2s;
-    }
-
-    .btn-download:hover {
-      background: #A06915;
-    }
-
-    .features-list {
-      text-align: left;
-      margin: 24px 0;
-      padding-left: 0;
-      list-style: none;
-    }
-
-    .features-list li {
-      font-size: 0.9rem;
-      color: var(--text);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-    }
-
-    .features-list li::before {
-      content: "✓";
-      color: var(--accent);
       font-weight: bold;
-      margin-right: 10px;
+      font-size: 1.1rem;
+      padding: 14px 0;
+      border-radius: 8px;
+      margin-top: 24px;
+      box-sizing: border-box;
     }
+    .btn-buy:hover { background-color: #1d4ed8; }
+    .footer-note { font-size: 0.8rem; color: #64748b; margin-top: 16px; }
   </style>
 </head>
 <body>
 
-  <div class="sales-card">
-    <span class="price-badge">₱79 ONE-TIME PAYMENT</span>
-    <h1>Get Kcal Log Full Version</h1>
-    <p>Unlock lifetime access to your lightweight daily calorie tracker on Android with official USDA food search integration.</p>
-
-    <ul class="features-list">
-      <li>Full Lifetime Access</li>
-      <li>Official USDA Food Database Search</li>
-      <li>Automatic Daily & Weekly Progress Trends</li>
-      <li>100% Offline Local Storage</li>
-      <li>No Subscriptions & No Ads</li>
-    </ul>
-
-    <a href="https://github.com/Papsitv/kcal-log/releases/download/v1.1/Kcal.Log.v1.1.apk" class="btn-download">
-      Download Full Version APK 🚀
+  <div class="card">
+    <h1>Kcal Log Pro</h1>
+    <p>Unlock lifetime access and premium calorie tracking features.</p>
+    
+    <div class="price">₱79</div>
+    
+    <!-- PayMongo Payment Link -->
+    <a href="https://pm.link/org-6z51H3v3b6TE6rktHCkdcMBC/99KO8RK" class="btn-buy" target="_blank">
+      Pay ₱79 with GCash / Maya / Card 🚀
     </a>
 
-    <p style="font-size: 0.8rem; margin-top: 16px; margin-bottom: 0;">
-      Compatible with Android 8.0+ devices.
-    </p>
+    <div class="footer-note">
+      Instant download link sent to your email after payment.
+    </div>
   </div>
 
 </body>
