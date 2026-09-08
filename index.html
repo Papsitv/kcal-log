@@ -278,7 +278,7 @@
 </head>
 <body>
 
-  <!-- READ ME ONBOARDING MODAL (Trial & Full Version) -->
+  <!-- READ ME ONBOARDING MODAL -->
   <div id="readMeModal" class="modal-overlay">
     <div class="modal-card">
       <div class="modal-title">👋 Welcome to Kcal Tracker!</div>
@@ -433,8 +433,9 @@
 
   <script>
     const USDA_API_KEY = 'sJQhPvt4Udtu4nx7RyG5iIEEMp8HcK0ZN3ju9aJJ';
+    const DOWNLOAD_APK_URL = 'https://github.com/Papsitv/kcal-log/releases/download/v1.1/kcal_Log.1.apk';
 
-    // 1. ANTI-SHARE DEVICE BINDING (Works on both Trial & Full Versions)
+    // 1. ANTI-SHARE DEVICE BINDING
     function validateDeviceBinding() {
       const currentSignature = navigator.userAgent + screen.width + "x" + screen.height;
       let storedSignature = localStorage.getItem('kcal_device_sig');
@@ -449,7 +450,7 @@
             <p style="color: #7A756C; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
               This instance of <strong>Kcal Tracker</strong> was registered on another device and cannot be shared.
             </p>
-            <a href="sales.html" style="text-decoration: none;">
+            <a href="${DOWNLOAD_APK_URL}" style="text-decoration: none;">
               <button style="width: 100%; padding: 14px; background: #B87A1B; color: #FFF; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
                 Get Your Own License (₱29)
               </button>
@@ -461,7 +462,7 @@
       return true;
     }
 
-    // 2. READ ME ONBOARDING GUIDE (Auto-opens on first launch for all versions)
+    // 2. READ ME ONBOARDING GUIDE
     function checkReadMeStatus() {
       const hasSeenReadMe = localStorage.getItem('kcal_readme_seen');
       if (!hasSeenReadMe) {
@@ -479,7 +480,6 @@
     const TRIAL_MS = TRIAL_DAYS * 24 * 60 * 60 * 1000;
 
     function checkTrialStatus() {
-      // Check if this build is the paid version flag
       if (localStorage.getItem('kcal_is_full_version') === 'true') {
         const banner = document.getElementById('trialBanner');
         if (banner) banner.style.display = 'none';
@@ -524,7 +524,7 @@
           <p style="color: #7A756C; font-size: 0.95rem; line-height: 1.5; margin-bottom: 24px;">
             Hope you enjoyed using <strong>Kcal Tracker</strong> with full USDA Food Guide integration! Unlock lifetime access today with a single one-time payment.
           </p>
-          <a href="sales.html" style="text-decoration: none;">
+          <a href="${DOWNLOAD_APK_URL}" style="text-decoration: none;">
             <button style="
               width: 100%; 
               padding: 16px; 
@@ -686,7 +686,6 @@
       navigator.serviceWorker.register('service-worker.js');
     }
 
-    // INITIALIZATION RUNS FOR BOTH VERSIONS
     if (validateDeviceBinding()) {
       checkTrialStatus();
       checkReadMeStatus();
