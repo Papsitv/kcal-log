@@ -1,58 +1,133 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calorie Tracker for Android | ZelVen Labs</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Get Kcal Log App</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #F8FAFC; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-    .card { background: #1E293B; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 440px; padding: 32px; text-align: center; border: 1px solid #334155; }
-    .badge { background: #0284C7; color: #ffffff; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.5px; }
-    h1 { font-size: 24px; margin: 16px 0 8px; color: #F8FAFC; }
-    p.subtitle { color: #94A3B8; font-size: 14px; margin-bottom: 20px; }
-    .price-box { margin: 20px 0; padding: 16px; background: #0F172A; border-radius: 12px; border: 1px solid #334155; }
-    .price { font-size: 32px; font-weight: 700; color: #10B981; }
-    .price-sub { font-size: 12px; color: #94A3B8; margin-top: 4px; }
-    .payment-details { background: #0F172A; border: 1px dashed #10B981; padding: 14px; border-radius: 12px; font-size: 14px; color: #CBD5E1; margin: 16px 0; text-align: center; line-height: 1.5; }
-    .payment-details strong { color: #10B981; }
-    .qr-container { margin: 10px 0 16px 0; background: #ffffff; padding: 16px; border-radius: 12px; display: inline-block; }
-    .qr-container img { width: 200px; height: 200px; display: block; border-radius: 8px; }
-    .btn-download { display: block; width: 100%; background: #10B981; color: #0F172A; font-weight: 700; font-size: 16px; padding: 14px; border-radius: 10px; text-decoration: none; transition: background 0.2s ease; margin-top: 20px; }
-    .btn-download:hover { background: #059669; }
-    .note { font-size: 12px; color: #64748B; margin-top: 16px; }
+    :root {
+      --bg: #F7F4EE;
+      --card-bg: #FFFFFF;
+      --dark-btn: #2B2823;
+      --accent: #B87A1B;
+      --text: #2B2823;
+      --text-muted: #7A756C;
+      --border: #E8E3D8;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 15px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .sales-card {
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 30px 24px;
+      max-width: 420px;
+      width: 100%;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      text-align: center;
+    }
+
+    .price-badge {
+      display: inline-block;
+      background: #FEF3C7;
+      color: #92400E;
+      font-weight: 800;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0 0 10px 0;
+    }
+
+    p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .btn-download {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: var(--accent);
+      color: #FFFFFF;
+      text-decoration: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(184, 122, 27, 0.3);
+      transition: background 0.2s;
+    }
+
+    .btn-download:hover {
+      background: #A06915;
+    }
+
+    .features-list {
+      text-align: left;
+      margin: 24px 0;
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .features-list li {
+      font-size: 0.9rem;
+      color: var(--text);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .features-list li::before {
+      content: "✓";
+      color: var(--accent);
+      font-weight: bold;
+      margin-right: 10px;
+    }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <span class="badge">ZelVen Labs</span>
-    <h1>Calorie Tracker</h1>
-    <p class="subtitle">Fast, lightweight Android app to log daily meals offline with USDA Food Guide integration.</p>
+  <div class="sales-card">
+    <span class="price-badge">₱29 ONE-TIME PAYMENT</span>
+    <h1>Get Kcal Log Full Version</h1>
+    <p>Unlock lifetime access to your lightweight daily calorie tracker on Android with official USDA food search integration.</p>
 
-    <div class="price-box">
-      <div class="price">₱29</div>
-      <div class="price-sub">One-time payment • Lifetime access</div>
-    </div>
+    <ul class="features-list">
+      <li>Full Lifetime Access</li>
+      <li>Official USDA Food Database Search</li>
+      <li>Automatic Daily & Weekly Progress Trends</li>
+      <li>100% Offline Local Storage</li>
+      <li>No Subscriptions & No Ads</li>
+    </ul>
 
-    <!-- GCASH ACCOUNT DETAILS PLACED AT THE TOP OF THE QR CODE -->
-    <div class="payment-details">
-      <p>Send <strong>₱29</strong> via GCash or Maya</p>
-      <p>Mobile: <strong>09206176536</strong></p>
-      <p>Account Name: <strong>DENNIS L.</strong></p>
-    </div>
-
-    <!-- GCash QR Code Image -->
-    <div class="qr-container">
-      <img src="myQR.png" alt="GCash QR Code" />
-    </div>
-
-    <!-- Direct link to download page -->
-    <a href="https://papsitv.github.io/kcal-log/download.html" class="btn-download">
-      I've Sent Payment — Go to Download
+    <a href="https://github.com/Papsitv/kcal-log/releases/download/v1.1/kcal_Log.1.apk" class="btn-download">
+      Download Full Version APK 🚀
     </a>
 
-    <p class="note">Please send exact payment before downloading.</p>
+    <p style="font-size: 0.8rem; margin-top: 16px; margin-bottom: 0;">
+      Compatible with Android 8.0+ devices.
+    </p>
   </div>
 
 </body>
