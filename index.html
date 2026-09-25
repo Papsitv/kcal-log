@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kcal Log</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1E2622">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Kcal Log">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root {
+  --paper: #FAF7F2;
+  --paper-dim: #F1ECE2;
+  --ink: #2B2620;
+  --ink-soft: #6E655A;
+  --line: #DDD5C4;
+  --mustard: #C68A2E;
+  --mustard-dark: #A66F1E;
+  --sage: #7A8B6F;
+  --rust: #B5533C;
+  --lcd-bg: #1E2622;
+  --lcd-digit: #8FE3C0;
+  --lcd-digit-dim: #3F5A50;
+  --warn-bg: #FBE9D9;
+  --warn-ink: #A66F1E;
+  --over-bg: #F7DFDA;
+  --over-ink: #A83B27;
+  --ok-bg: #E7EEE3;
+  --ok-ink: #5C6E52;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+button {
+  touch-action: manipulation;
+}
+.app {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 18px 16px 40px;
+}
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+  margin: 0 0 4px 2px;
+}
+h1 {
+  font-size: 20px;
+  margin: 0 0 16px 2px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+/* =========================================================
+   MAIN TABS
+   ========================================================= */
+.main-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin: -4px 0 16px;
+}
+.main-tabs button {
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 0;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.main-tabs button.active {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+}
+/* =========================================================
+   SCALE / DAILY READOUT
+   ========================================================= */
+.scale {
+  background: var(--lcd-bg);
+  border-radius: 18px;
+  padding: 18px 20px 16px;
+  box-shadow:
+    0 6px 18px rgba(30,38,34,0.25),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  position: relative;
+  overflow: hidden;
+}
+.scale::before {
+  content: "";
+  position: absolute;
+  top: -30%;
+  left: -10%;
+  width: 60%;
+  height: 160%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0.05),
+    transparent 60%
+  );
+  pointer-events: none;
+}
+.scale-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.scale-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--lcd-digit-dim);
+  font-weight: 600;
+}
+.scale-date {
+  font-size: 11px;
+  color: var(--lcd-digit-dim);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.scale-readout {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 52px;
+  font-weight: 700;
+  color: var(--lcd-digit);
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  margin: 2px 0 0;
+  text-shadow: 0 0 14px rgba(143,227,192,0.35);
+  transition: color 0.25s ease;
+}
+.scale-readout.over {
+  color: #E3A98F;
+  text-shadow: 0 0 14px rgba(227,169,143,0.35);
+}
+.scale-unit {
+  font-size: 15px;
+  color: var(--lcd-digit-dim);
+  font-weight: 600;
+  margin-left: 6px;
+}
+.scale-sub {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--lcd-digit-dim);
+}
+.goal-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px dashed var(--lcd-digit-dim);
+  color: var(--lcd-digit-dim);
+  font-family: inherit;
+  font-size: 11px;
+  width: 54px;
+  text-align: right;
+  padding: 0 0 1px;
+}
+.goal-input:focus {
+  outline: none;
+  color: var(--lcd-digit);
+  border-color: var(--lcd-digit);
+}
+.save-status {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  color: var(--lcd-digit-dim);
+  transition: color 0.2s ease;
+}
+.save-status.ok {
+  color: var(--lcd-digit);
+}
+.save-status.warn {
+  color: #E3A98F;
+}
+/* =========================================================
+   GOAL WARNING BANNER
+   ========================================================= */
+.goal-warning {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.goal-warning.show {
+  display: flex;
+}
+.goal-warning .gw-icon {
+  font-size: 17px;
+  flex-shrink: 0;
+}
+.goal-warning.near {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+.goal-warning.over {
+  background: var(--over-bg);
+  color: var(--over-ink);
+}
+.goal-warning.ok {
+  background: var(--ok-bg);
+  color: var(--ok-ink);
+}
+/* =========================================================
+   DATE NAVIGATION
+   ========================================================= */
+.datebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+.datebar input[type="date"] {
+  flex: 1;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+.icon-btn {
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  font-size: 20px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.icon-btn:active {
+  background: var(--mustard);
+  color: #fff;
+}
+/* =========================================================
+   ADD ENTRY
+   ========================================================= */
+.add-card {
+  margin-top: 18px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+}
+.add-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mustard-dark);
+  letter-spacing: 0.02em;
+  margin: 0 0 10px 2px;
+}
+.field-label {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  margin: 0 0 4px 2px;
+  display: block;
+}
+.row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.row > div {
+  flex: 1;
+}
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  width: 100%;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+textarea {
+  resize: vertical;
+  min-height: 44px;
+}
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--mustard);
+  outline-offset: -1px;
+}
+/* =========================================================
+   TIME PICKER
+   ========================================================= */
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.time-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 4px 6px;
+}
+.time-field input {
+  width: 32px;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  padding: 6px 0;
+  -moz-appearance: textfield;
+}
+.time-field input::-webkit-outer-spin-button,
+.time-field input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.time-field input:focus {
+  outline: none;
+}
+.step-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 7px;
+  background: var(--paper-dim);
+  color: var(--ink-soft);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+.step-btn:active {
+  background: var(--mustard);
+  color: #fff;
+}
+.time-colon {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin: 0 -2px;
+}
+.ampm-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.ampm-toggle button {
+  border: none;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 10px;
+  cursor: pointer;
+}
+.ampm-toggle button.active {
+  background: var(--mustard);
+  color: #fff;
+}
+.time-preview {
+  margin-top: 8px;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 12px;
+  color: var(--mustard-dark);
+  font-weight: 600;
+}
+.add-btn {
+  width: 100%;
+  margin-top: 4px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+.add-btn:active {
+  background: var(--mustard-dark);
+}
+/* =========================================================
+   ENTRIES
+   ========================================================= */
+.entries {
+  margin-top: 22px;
+}
+.entries-title {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+  margin: 0 0 8px 2px;
+  display: flex;
+  justify-content: space-between;
+}
+.entry {
+  display: flex;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px dashed var(--line);
+  align-items: flex-start;
+}
+.entry:last-child {
+  border-bottom: none;
+}
+.entry-time {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  width: 52px;
+  flex-shrink: 0;
+  padding-top: 2px;
+}
+.entry-main {
+  flex: 1;
+  min-width: 0;
+}
+.entry-food {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  word-break: break-word;
+}
+.entry-notes {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 2px;
+  word-wrap: break-word;
+}
+.entry-running {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 10px;
+  color: var(--mustard-dark);
+  letter-spacing: 0.02em;
+  margin-top: 3px;
+  opacity: 0.75;
+}
+.entry-kcal {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mustard-dark);
+  white-space: nowrap;
+  padding-top: 1px;
+}
+.entry-del {
+  background: none;
+  border: none;
+  color: var(--rust);
+  font-size: 18px;
+  padding: 0 0 0 4px;
+  cursor: pointer;
+  line-height: 1;
+}
+.empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+  padding: 30px 10px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+}
+.day-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 14px;
+  background: var(--ink);
+  border-radius: 12px;
+}
+.day-summary-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  font-weight: 600;
+}
+.day-summary-kcal {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mustard);
+  flex: 1;
+  text-align: right;
+  margin-right: 4px;
+}
+.day-summary-diff {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--sage);
+}
+.day-summary.over .day-summary-diff {
+  color: #E3A98F;
+}
+/* =========================================================
+   SUMMARY TABS
+   ========================================================= */
+.sum-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.sum-tabs button {
+  flex: 1;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.sum-tabs button.active {
+  background: var(--mustard);
+  color: #fff;
+  border-color: var(--mustard);
+}
+/* =========================================================
+   SUMMARY CARDS
+   ========================================================= */
+.sum-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.sum-card-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 700;
+  margin: 0 0 10px 2px;
+}
+.avg-strip {
+  display: flex;
+  justify-content: space-between;
+  background: var(--ink);
+  border-radius: 12px;
+  padding: 12px 10px;
+  margin-bottom: 14px;
+}
+.avg-item {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+.avg-num {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--mustard);
+  white-space: nowrap;
+}
+.avg-label {
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  margin-top: 3px;
+}
+/* =========================================================
+   SUMMARY LEDGER
+   ========================================================= */
+.ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 13px;
+}
+.ledger-row:last-child {
+  border-bottom: none;
+}
+.ledger-day {
+  font-weight: 600;
+  color: var(--ink);
+}
+.ledger-date {
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-left: 6px;
+}
+.ledger-kcal {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-weight: 700;
+  color: var(--mustard-dark);
+  white-space: nowrap;
+}
+.ledger-kcal.zero {
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+.ledger-diff {
+  font-size: 11px;
+  color: var(--sage);
+  margin-left: 6px;
+  white-space: nowrap;
+}
+.ledger-diff.over {
+  color: var(--rust);
+}
+/* =========================================================
+   WEEKDAY PATTERN
+   ========================================================= */
+.weekday-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 9px;
+  font-size: 12px;
+}
+.weekday-bar-label {
+  width: 32px;
+  color: var(--ink-soft);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.weekday-bar-track {
+  flex: 1;
+  height: 16px;
+  background: var(--paper-dim);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+.weekday-bar-fill {
+  height: 100%;
+  background: var(--mustard);
+  border-radius: 6px;
+  min-width: 0;
+}
+.weekday-bar-num {
+  width: 48px;
+  text-align: right;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  flex-shrink: 0;
+}
+/* =========================================================
+   MONTH PICKER
+   ========================================================= */
+.month-select {
+  width: 100%;
+  font-size: 14px;
+  color: var(--ink);
+  background: var(--paper-dim);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 9px 10px;
+  margin-bottom: 14px;
+}
+/* =========================================================
+   SUMMARY HELP / INFO
+   ========================================================= */
+.summary-note {
+  font-size: 11px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-top: -4px;
+  margin-bottom: 14px;
+}
+/* =========================================================
+   PROFILE TAB
+   ========================================================= */
+.sex-toggle {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sex-toggle button {
+  flex: 1;
+  border: none;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 9px 0;
+  cursor: pointer;
+}
+.sex-toggle button.active {
+  background: var(--mustard);
+  color: #fff;
+}
+.profile-results {
+  margin-top: 6px;
+}
+.pr-strip {
+  display: flex;
+  justify-content: space-between;
+  background: var(--ink);
+  border-radius: 12px;
+  padding: 14px 10px;
+  margin-top: 4px;
+}
+.pr-item {
+  text-align: center;
+  flex: 1;
+  min-width: 0;
+}
+.pr-num {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--mustard);
+  white-space: nowrap;
+}
+.pr-num.target {
+  color: var(--lcd-digit);
+}
+.pr-label {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  margin-top: 3px;
+}
+.pr-caution {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.pr-caution .gw-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.use-goal-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: var(--sage);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.use-goal-btn:active {
+  opacity: 0.85;
+}
+.use-goal-btn.confirmed {
+  background: var(--ink);
+}
+.profile-name-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin: -6px 0 14px 2px;
+}
+/* =========================================================
+   FOODS TAB
+   ========================================================= */
+.foods-search {
+  margin-bottom: 12px;
+}
+.foods-cat-title {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mustard-dark);
+  font-weight: 700;
+  margin: 16px 0 6px 2px;
+}
+.foods-cat-title:first-of-type {
+  margin-top: 4px;
+}
+.food-row {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.food-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+.food-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.food-per100 {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.food-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.food-grams {
+  width: 64px;
+  font-size: 13px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+}
+.food-grams-label {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+.food-kcal-result {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mustard-dark);
+  flex: 1;
+  text-align: right;
+}
+.food-add-btn {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.food-add-btn:active {
+  background: var(--mustard-dark);
+}
+.foods-empty {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+  padding: 24px 10px;
+}
+.food-unit-input {
+  width: 64px;
+  font-size: 13px;
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+}
+.food-lookup-card {
+  margin-top: 18px;
+  background: var(--paper-dim);
+  border: 1px dashed var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+.food-lookup-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 5px;
+}
+.food-lookup-text {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+.food-lookup-link {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mustard-dark);
+  text-decoration: none;
+  padding: 9px 0;
+  border-top: 1px dashed var(--line);
+}
+.food-lookup-link:first-of-type {
+  border-top: none;
+}
+.usda-search-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.usda-search-row input {
+  flex: 1;
+}
+.usda-search-btn {
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 10px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.usda-search-btn:active {
+  background: var(--mustard-dark);
+}
+.usda-search-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.usda-status {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  margin: 0 0 10px 2px;
+  min-height: 14px;
+}
+.usda-status.error {
+  color: var(--rust);
+}
+
+/* === Trial Mode Overlay === */
+#trialBanner{background:#FFF4E5;border:1px solid #F3D19C;border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+#trialLock{position:fixed;inset:0;background:rgba(30,38,34,.94);display:none;align-items:center;justify-content:center;padding:20px;z-index:99999}
+#trialLock .card{background:#FAF7F2;color:#2B2620;border-radius:20px;padding:24px;max-width:420px;width:100%;text-align:center}
+#trialLock button{background:#2563EB;color:#fff;border:none;border-radius:12px;padding:14px;width:100%;font-weight:700;cursor:pointer}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<div id="trialBanner"><span id="trialText">Trial</span><strong>₱79 Lifetime</strong></div>
+<div id="trialLock"><div class="card"><h2>Your Trial Has Ended</h2><p>Pay one time and get access to the app for a lifetime.</p><button id="buyLifetimeBtn">Buy & Unlock Lifetime Access</button></div></div>
+
+  <div class="eyebrow">Food log</div>
+  <h1>Kcal Tracker</h1>
+  <!-- =====================================================
+       MAIN NAVIGATION
+       ===================================================== -->
+  <div class="main-tabs">
+    <button id="tabLogBtn" class="active">Log</button>
+    <button id="tabSummaryBtn">Summary</button>
+    <button id="tabProfileBtn">Profile</button>
+    <button id="tabFoodsBtn">Foods</button>
+  </div>
+  <!-- =====================================================
+       LOG VIEW
+       ===================================================== -->
+  <div id="logView">
+    <!-- DAILY SCALE -->
+    <div class="scale">
+      <div class="scale-row">
+        <span class="scale-label">Selected day's total</span>
+        <span class="scale-date" id="scaleDate">--</span>
+      </div>
+      <div class="scale-readout" id="totalReadout">
+        0<span class="scale-unit">kcal</span>
+      </div>
+      <div class="scale-sub">
+        <span id="entryCount">0 entries</span>
+        <span id="saveStatus" class="save-status"></span>
+        <span>
+          Goal
+          <input
+            type="number"
+            id="goalInput"
+            class="goal-input"
+            placeholder="—"
+            min="0"
+            step="1"
+          >
+        </span>
+      </div>
+      <div class="goal-warning" id="goalWarning">
+        <span class="gw-icon" id="goalWarningIcon">⚠️</span>
+        <span id="goalWarningText"></span>
+      </div>
+    </div>
+    <!-- DATE NAVIGATION -->
+    <div class="datebar">
+      <button class="icon-btn" id="prevDay" aria-label="Previous day">
+        ‹
+      </button>
+      <input type="date" id="dateSelect">
+      <button class="icon-btn" id="nextDay" aria-label="Next day">
+        ›
+      </button>
+    </div>
+    <!-- ADD ENTRY -->
+    <div class="add-card">
+      <div class="add-title">
+        Add entry
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">
+            Food / item
+          </span>
+          <input
+            type="text"
+            id="foodName"
+            placeholder="e.g. Chicken adobo"
+            autocomplete="off"
+          >
+        </div>
+        <div style="max-width:100px;">
+          <span class="field-label">
+            Kcal
+          </span>
+          <input
+            type="number"
+            id="kcalInput"
+            placeholder="0"
+            min="0"
+            step="1"
+            inputmode="numeric"
+          >
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">
+            Time
+          </span>
+          <div class="time-picker">
+            <div class="time-field">
+              <button type="button" class="step-btn" id="hourDown">–</button>
+              <input type="text" inputmode="numeric" id="hourInput" value="9" maxlength="2">
+              <button type="button" class="step-btn" id="hourUp">+</button>
+            </div>
+            <span class="time-colon">:</span>
+            <div class="time-field">
+              <button type="button" class="step-btn" id="minDown">–</button>
+              <input type="text" inputmode="numeric" id="minInput" value="00" maxlength="2">
+              <button type="button" class="step-btn" id="minUp">+</button>
+            </div>
+            <div class="ampm-toggle">
+              <button type="button" id="amBtn" class="active">AM</button>
+              <button type="button" id="pmBtn">PM</button>
+            </div>
+          </div>
+          <div class="time-preview" id="timePreview">9:00 AM</div>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">
+            Notes (optional)
+          </span>
+          <textarea id="notesInput" placeholder="e.g. 1 piece, homemade, extra rice"></textarea>
+        </div>
+      </div>
+      <button class="add-btn" id="addBtn">Add to log</button>
+    </div>
+    <!-- ENTRIES -->
+    <div class="entries">
+      <div class="entries-title">
+        <span id="listDateLabel">Entries</span>
+      </div>
+      <div id="entryList"></div>
+    </div>
+  </div>
+  <!-- =====================================================
+       SUMMARY VIEW
+       ===================================================== -->
+  <div id="summaryView" style="display:none;">
+    <div class="sum-tabs">
+      <button id="sumDailyBtn" class="active">Daily</button>
+      <button id="sumWeeklyBtn">Weekly</button>
+      <button id="sumMonthlyBtn">Monthly</button>
+    </div>
+    <div id="summaryContent"></div>
+  </div>
+  <!-- =====================================================
+       PROFILE VIEW
+       ===================================================== -->
+  <div id="profileView" style="display:none;">
+    <div class="add-card">
+      <div class="add-title">Your profile</div>
+      <div class="profile-name-note">
+        Used to estimate your calorie needs — nothing is sent anywhere, it stays on this device.
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">Name</span>
+          <input type="text" id="profName" placeholder="Your name" autocomplete="off">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">Sex</span>
+          <div class="sex-toggle">
+            <button type="button" id="profSexM" class="active">Male</button>
+            <button type="button" id="profSexF">Female</button>
+          </div>
+        </div>
+        <div>
+          <span class="field-label">Age (years)</span>
+          <input type="number" id="profAge" min="10" max="100" step="1" placeholder="e.g. 32">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">Weight (kg)</span>
+          <input type="number" id="profWeight" min="20" max="300" step="0.1" placeholder="e.g. 70">
+        </div>
+        <div>
+          <span class="field-label">Height (cm)</span>
+          <input type="number" id="profHeight" min="100" max="250" step="0.1" placeholder="e.g. 170">
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">Activity level</span>
+          <select id="profActivity">
+            <option value="sedentary">Sedentary (little/no exercise)</option>
+            <option value="light">Light (exercise 1–3 days/wk)</option>
+            <option value="moderate" selected>Moderate (exercise 3–5 days/wk)</option>
+            <option value="active">Active (exercise 6–7 days/wk)</option>
+            <option value="veryactive">Very active (hard training / physical job)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <span class="field-label">Goal</span>
+          <select id="profGoal">
+            <option value="maintain">Maintain current weight</option>
+            <option value="mildloss">Mild weight loss (~0.25 kg/wk)</option>
+            <option value="loss" selected>Weight loss (~0.5 kg/wk)</option>
+            <option value="extremeloss">Faster weight loss (~1 kg/wk)</option>
+            <option value="mildgain">Mild weight gain (~0.25 kg/wk)</option>
+            <option value="gain">Weight gain (~0.5 kg/wk)</option>
+          </select>
+        </div>
+      </div>
+      <button class="add-btn" id="profCalcBtn">Calculate my target</button>
+      <div class="profile-results" id="profileResults" style="display:none;">
+        <div class="pr-strip">
+          <div class="pr-item">
+            <div class="pr-num" id="prBmr">--</div>
+            <div class="pr-label">BMR</div>
+          </div>
+          <div class="pr-item">
+            <div class="pr-num" id="prTdee">--</div>
+            <div class="pr-label">Maintenance</div>
+          </div>
+          <div class="pr-item">
+            <div class="pr-num target" id="prTarget">--</div>
+            <div class="pr-label">Daily target</div>
+          </div>
+        </div>
+        <div class="pr-caution" id="prCaution" style="display:none;">
+          <span class="gw-icon">⚠️</span>
+          <span id="prCautionText"></span>
+        </div>
+        <button class="use-goal-btn" id="useGoalBtn">Set as my daily goal in Log</button>
+      </div>
+    </div>
+  </div>
+  <!-- =====================================================
+       FOODS VIEW (Philippine food calorie reference)
+       ===================================================== -->
+  <div id="foodsView" style="display:none;">
+    <div class="summary-note">
+      Approximate calories for common Filipino dishes, pantry staples, and everyday packaged foods. Actual values vary by brand and recipe — use these as a quick reference, adjust the amount, then tap "Use" to drop it straight into today's log.
+    </div>
+    <input
+      type="text"
+      id="foodsSearch"
+      class="foods-search"
+      placeholder="Search a food (e.g. adobo, tuna, bread, egg)"
+      autocomplete="off"
+    >
+    <div id="foodsList"></div>
+    <div class="food-lookup-card">
+      <div class="food-lookup-title">Can't find it here? Search USDA FoodData Central</div>
+      <div class="food-lookup-text">
+        Live search of the USDA database — thousands of foods and branded products, values per 100g.
+      </div>
+      <div class="usda-search-row">
+        <input type="text" id="usdaSearchInput" placeholder="e.g. peanut butter, white bread" autocomplete="off">
+        <button type="button" class="usda-search-btn" id="usdaSearchBtn">Search</button>
+      </div>
+      <div class="usda-status" id="usdaStatus"></div>
+      <div id="usdaResults"></div>
+      <a class="food-lookup-link" href="https://i.fnri.dost.gov.ph/login/fct" target="_blank" rel="noopener">FNRI PhilFCT — official PH food composition tables ↗</a>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  /* =======================================================
+     STORAGE
+     ======================================================= */
+  const STORAGE_KEY = 'kcal-log-entries';
+  const GOAL_KEY = 'kcal-daily-goal';
+  const PROFILE_KEY = 'kcal-profile';
+  /* Free key from https://fdc.nal.usda.gov/api-key-signup.html — paste yours below. */
+  const USDA_API_KEY = 'REPLACE_WITH_YOUR_USDA_API_KEY';
+  let allEntries = {};
+  let dailyGoal = null;
+  let profile = null;
+  let selectedDate = todayStr();
+  let sumMode = 'daily';
+  /* =======================================================
+     BASIC HELPERS
+     ======================================================= */
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+  function todayStr() {
+    const d = new Date();
+    return (
+      d.getFullYear() +
+      '-' +
+      pad(d.getMonth() + 1) +
+      '-' +
+      pad(d.getDate())
+    );
+  }
+  function dateToString(d) {
+    return (
+      d.getFullYear() +
+      '-' +
+      pad(d.getMonth() + 1) +
+      '-' +
+      pad(d.getDate())
+    );
+  }
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = String(str);
+    return d.innerHTML;
+  }
+  /* =======================================================
+     DATE FORMATTING
+     ======================================================= */
+  function formatDateLabel(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const today = todayStr();
+    const opts = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    };
+    let label = d.toLocaleDateString('en-US', opts);
+    if (dateStr === today) {
+      label = 'Today · ' + label;
+    }
+    return label;
+  }
+  function fmtShort(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric'
+    });
+  }
+  function weekdayName(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'short' });
+  }
+  /* =======================================================
+     TIME PICKER
+     ======================================================= */
+  const hourInput = document.getElementById('hourInput');
+  const minInput = document.getElementById('minInput');
+  const amBtn = document.getElementById('amBtn');
+  const pmBtn = document.getElementById('pmBtn');
+  const timePreview = document.getElementById('timePreview');
+  let currentAmPm = 'AM';
+  function clampHour(v) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) v = 12;
+    if (v < 1) v = 12;
+    if (v > 12) v = 1;
+    return v;
+  }
+  function clampMin(v) {
+    v = parseInt(v, 10);
+    if (isNaN(v)) v = 0;
+    if (v < 0) v = 55;
+    if (v > 59) v = 0;
+    return v;
+  }
+  function updatePreview() {
+    const h = clampHour(hourInput.value);
+    const m = clampMin(minInput.value);
+    timePreview.textContent = h + ':' + pad(m) + ' ' + currentAmPm;
+  }
+  hourInput.addEventListener('input', updatePreview);
+  minInput.addEventListener('input', updatePreview);
+  hourInput.addEventListener('blur', () => {
+    hourInput.value = clampHour(hourInput.value);
+    updatePreview();
+  });
+  minInput.addEventListener('blur', () => {
+    minInput.value = pad(clampMin(minInput.value));
+    updatePreview();
+  });
+  document.getElementById('hourUp').addEventListener('click', () => {
+    hourInput.value = clampHour(clampHour(hourInput.value) + 1);
+    updatePreview();
+  });
+  document.getElementById('hourDown').addEventListener('click', () => {
+    hourInput.value = clampHour(clampHour(hourInput.value) - 1);
+    updatePreview();
+  });
+  document.getElementById('minUp').addEventListener('click', () => {
+    let value = clampMin(minInput.value);
+    value += 5;
+    if (value > 59) value = 0;
+    minInput.value = pad(value);
+    updatePreview();
+  });
+  document.getElementById('minDown').addEventListener('click', () => {
+    let value = clampMin(minInput.value);
+    value -= 5;
+    if (value < 0) value = 55;
+    minInput.value = pad(value);
+    updatePreview();
+  });
+  amBtn.addEventListener('click', () => {
+    currentAmPm = 'AM';
+    amBtn.classList.add('active');
+    pmBtn.classList.remove('active');
+    updatePreview();
+  });
+  pmBtn.addEventListener('click', () => {
+    currentAmPm = 'PM';
+    pmBtn.classList.add('active');
+    amBtn.classList.remove('active');
+    updatePreview();
+  });
+  (function setDefaultTime() {
+    const now = new Date();
+    let h = now.getHours();
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12;
+    if (h === 0) h = 12;
+    hourInput.value = h;
+    const roundedMin = Math.round(now.getMinutes() / 5) * 5;
+    let finalMin = roundedMin;
+    if (finalMin >= 60) finalMin = 0;
+    minInput.value = pad(finalMin);
+    if (ampm === 'PM') {
+      pmBtn.click();
+    } else {
+      updatePreview();
+    }
+  })();
+  /* =======================================================
+     DATE NAVIGATION
+     ======================================================= */
+  const dateSelect = document.getElementById('dateSelect');
+  dateSelect.value = selectedDate;
+  dateSelect.addEventListener('change', () => {
+    if (!dateSelect.value) return;
+    selectedDate = dateSelect.value;
+    render();
+    if (summaryView.style.display !== 'none') {
+      renderSummary();
+    }
+  });
+  document.getElementById('prevDay').addEventListener('click', () => shiftDate(-1));
+  document.getElementById('nextDay').addEventListener('click', () => shiftDate(1));
+  function shiftDate(delta) {
+    const d = new Date(selectedDate + 'T00:00:00');
+    d.setDate(d.getDate() + delta);
+    selectedDate = dateToString(d);
+    dateSelect.value = selectedDate;
+    render();
+    if (summaryView.style.display !== 'none') {
+      renderSummary();
+    }
+  }
+  /* =======================================================
+     DAILY GOAL
+     ======================================================= */
+  const goalInput = document.getElementById('goalInput');
+  goalInput.addEventListener('change', () => {
+    const value = goalInput.value.trim();
+    if (value === '') {
+      dailyGoal = null;
+    } else {
+      const parsed = parseInt(value, 10);
+      dailyGoal = Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    }
+    saveWithRetry(GOAL_KEY, JSON.stringify(dailyGoal));
+    render();
+    if (summaryView.style.display !== 'none') {
+      renderSummary();
+    }
+  });
+  /* =======================================================
+     ADD ENTRY
+     ======================================================= */
+  document.getElementById('addBtn').addEventListener('click', addEntry);
+  async function addEntry() {
+    const food = document.getElementById('foodName').value.trim();
+    const kcalRaw = document.getElementById('kcalInput').value.trim();
+    const notes = document.getElementById('notesInput').value.trim();
+    const kcal = Number(kcalRaw);
+    const hour = clampHour(hourInput.value);
+    const min = clampMin(minInput.value);
+    if (!food) {
+      flash(document.getElementById('foodName'));
+      return;
+    }
+    if (kcalRaw === '' || !Number.isFinite(kcal) || kcal < 0) {
+      flash(document.getElementById('kcalInput'));
+      return;
+    }
+    const entry = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 9),
+      hour: parseInt(hour, 10),
+      min: parseInt(min, 10),
+      ampm: currentAmPm,
+      food: food,
+      kcal: Math.round(kcal),
+      notes: notes
+    };
+    if (!allEntries[selectedDate]) {
+      allEntries[selectedDate] = [];
+    }
+    allEntries[selectedDate].push(entry);
+    saveEntries();
+    document.getElementById('foodName').value = '';
+    document.getElementById('kcalInput').value = '';
+    document.getElementById('notesInput').value = '';
+    document.getElementById('foodName').focus();
+    render();
+    if (summaryView.style.display !== 'none') {
+      renderSummary();
+    }
+  }
+  function flash(el) {
+    el.style.outline = '2px solid #B5533C';
+    setTimeout(() => {
+      el.style.outline = '';
+    }, 700);
+  }
+  /* =======================================================
+     DELETE ENTRY
+     ======================================================= */
+  async function deleteEntry(dateKey, id) {
+    if (!allEntries[dateKey]) return;
+    allEntries[dateKey] = allEntries[dateKey].filter(e => e.id !== id);
+    if (allEntries[dateKey].length === 0) {
+      delete allEntries[dateKey];
+    }
+    saveEntries();
+    render();
+    if (summaryView.style.display !== 'none') {
+      renderSummary();
+    }
+  }
+  /* =======================================================
+     STORAGE
+     ======================================================= */
+  function saveEntries() {
+    saveWithRetry(STORAGE_KEY, JSON.stringify(allEntries));
+  }
+  function saveWithRetry(key, value) {
+    try {
+      localStorage.setItem(key, value);
+      setSaveStatus('saved');
+      return true;
+    } catch (e) {
+      console.error('Storage save failed:', e);
+      setSaveStatus('error');
+      return false;
+    }
+  }
+  let saveStatusTimeout = null;
+  function setSaveStatus(status) {
+    const el = document.getElementById('saveStatus');
+    if (!el) return;
+    clearTimeout(saveStatusTimeout);
+    if (status === 'saved') {
+      el.textContent = 'Saved';
+      el.className = 'save-status ok';
+      saveStatusTimeout = setTimeout(() => {
+        el.textContent = '';
+        el.className = 'save-status';
+      }, 1600);
+    } else if (status === 'error') {
+      el.textContent = 'Not saved — storage unavailable';
+      el.className = 'save-status warn';
+    }
+  }
+  /* =======================================================
+     LOAD DATA
+     ======================================================= */
+  function loadData() {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed && typeof parsed === 'object') {
+          allEntries = parsed;
+        }
+      }
+    } catch (e) {
+      console.error('Could not load entries:', e);
+      allEntries = {};
+    }
+    try {
+      const goalStored = localStorage.getItem(GOAL_KEY);
+      if (goalStored) {
+        const parsedGoal = JSON.parse(goalStored);
+        if (parsedGoal !== null && Number.isFinite(Number(parsedGoal))) {
+          dailyGoal = Number(parsedGoal);
+        }
+      }
+    } catch (e) {
+      console.error('Could not load goal:', e);
+      dailyGoal = null;
+    }
+    try {
+      const profStored = localStorage.getItem(PROFILE_KEY);
+      if (profStored) {
+        const parsedProf = JSON.parse(profStored);
+        if (parsedProf && typeof parsedProf === 'object') {
+          profile = parsedProf;
+        }
+      }
+    } catch (e) {
+      console.error('Could not load profile:', e);
+      profile = null;
+    }
+    applyProfileToForm();
+    render();
+    buildFoodsList();
+  }
+  /* =======================================================
+     TIME / SORTING
+     ======================================================= */
+  function to12h(hour, min, ampm) {
+    return hour + ':' + pad(min) + ' ' + ampm;
+  }
+  function sortKey(e) {
+    let h = Number(e.hour) % 12;
+    if (e.ampm === 'PM') h += 12;
+    return h * 60 + Number(e.min);
+  }
+  /* =======================================================
+     DAY TOTAL
+     ======================================================= */
+  function dayTotal(dateStr) {
+    const list = allEntries[dateStr] || [];
+    return list.reduce((sum, e) => sum + (Number(e.kcal) || 0), 0);
+  }
+  /* =======================================================
+     GOAL WARNING BANNER
+     ======================================================= */
+  function updateGoalWarning(total) {
+    const banner = document.getElementById('goalWarning');
+    const icon = document.getElementById('goalWarningIcon');
+    const text = document.getElementById('goalWarningText');
+    banner.classList.remove('near', 'over', 'ok', 'show');
+    if (dailyGoal === null || dailyGoal === undefined || !dailyGoal) {
+      return;
+    }
+    const pct = total / dailyGoal;
+    if (total > dailyGoal) {
+      const over = total - dailyGoal;
+      banner.classList.add('over', 'show');
+      icon.textContent = pct >= 1.2 ? '🚨' : '🔴';
+      text.textContent = over + ' kcal over your ' + dailyGoal + ' kcal goal today.';
+    } else if (pct >= 0.9) {
+      const left = dailyGoal - total;
+      banner.classList.add('near', 'show');
+      icon.textContent = '⚠️';
+      text.textContent = 'Nearing your goal — only ' + left + ' kcal left today.';
+    }
+    /* Comfortably under goal: no banner needed, keeps things clean. */
+  }
+  /* =======================================================
+     MAIN LOG RENDER
+     ======================================================= */
+  function render() {
+    dateSelect.value = selectedDate;
+    document.getElementById('scaleDate').textContent = formatDateLabel(selectedDate);
+    document.getElementById('listDateLabel').textContent = formatDateLabel(selectedDate) + ' — entries';
+    goalInput.value = dailyGoal !== null ? dailyGoal : '';
+    const list = (allEntries[selectedDate] || []).slice().sort((a, b) => sortKey(a) - sortKey(b));
+    const total = list.reduce((sum, e) => sum + (Number(e.kcal) || 0), 0);
+    const readout = document.getElementById('totalReadout');
+    readout.innerHTML = total + '<span class="scale-unit">kcal</span>';
+    if (dailyGoal !== null && total > dailyGoal) {
+      readout.classList.add('over');
+    } else {
+      readout.classList.remove('over');
+    }
+    updateGoalWarning(total);
+    document.getElementById('entryCount').textContent =
+      list.length + (list.length === 1 ? ' entry' : ' entries');
+    const container = document.getElementById('entryList');
+    container.innerHTML = '';
+    if (list.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = 'No entries yet for this day. Add your first meal above.';
+      container.appendChild(empty);
+      return;
+    }
+    let running = 0;
+    list.forEach(e => {
+      running += Number(e.kcal) || 0;
+      const row = document.createElement('div');
+      row.className = 'entry';
+      row.innerHTML = `
+        <div class="entry-time">${to12h(e.hour, e.min, e.ampm)}</div>
+        <div class="entry-main">
+          <div class="entry-food">${escapeHtml(e.food)}</div>
+          ${e.notes ? `<div class="entry-notes">${escapeHtml(e.notes)}</div>` : ''}
+          <div class="entry-running">running total: ${running} kcal</div>
+        </div>
+        <div class="entry-kcal">${Number(e.kcal) || 0}</div>
+        <button class="entry-del" data-id="${escapeHtml(e.id)}" aria-label="Delete entry" title="Delete entry">×</button>
+      `;
+      row.querySelector('.entry-del').addEventListener('click', () => deleteEntry(selectedDate, e.id));
+      container.appendChild(row);
+    });
+    const summary = document.createElement('div');
+    summary.className = 'day-summary';
+    let summaryHtml = `
+      <span class="day-summary-label">Day total</span>
+      <span class="day-summary-kcal">${total} kcal</span>
+    `;
+    if (dailyGoal !== null) {
+      const diff = dailyGoal - total;
+      if (diff >= 0) {
+        summaryHtml += `<span class="day-summary-diff">${diff} kcal left</span>`;
+      } else {
+        summary.classList.add('over');
+        summaryHtml += `<span class="day-summary-diff">${Math.abs(diff)} kcal over</span>`;
+      }
+    }
+    summary.innerHTML = summaryHtml;
+    container.appendChild(summary);
+  }
+  /* =======================================================
+     MAIN TAB SWITCHING
+     ======================================================= */
+  const tabLogBtn = document.getElementById('tabLogBtn');
+  const tabSummaryBtn = document.getElementById('tabSummaryBtn');
+  const tabProfileBtn = document.getElementById('tabProfileBtn');
+  const tabFoodsBtn = document.getElementById('tabFoodsBtn');
+  const logView = document.getElementById('logView');
+  const summaryView = document.getElementById('summaryView');
+  const profileView = document.getElementById('profileView');
+  const foodsView = document.getElementById('foodsView');
+  function activateTab(name) {
+    tabLogBtn.classList.toggle('active', name === 'log');
+    tabSummaryBtn.classList.toggle('active', name === 'summary');
+    tabProfileBtn.classList.toggle('active', name === 'profile');
+    tabFoodsBtn.classList.toggle('active', name === 'foods');
+    logView.style.display = name === 'log' ? '' : 'none';
+    summaryView.style.display = name === 'summary' ? '' : 'none';
+    profileView.style.display = name === 'profile' ? '' : 'none';
+    foodsView.style.display = name === 'foods' ? '' : 'none';
+    if (name === 'summary') renderSummary();
+  }
+  tabLogBtn.addEventListener('click', () => activateTab('log'));
+  tabSummaryBtn.addEventListener('click', () => activateTab('summary'));
+  tabProfileBtn.addEventListener('click', () => activateTab('profile'));
+  tabFoodsBtn.addEventListener('click', () => activateTab('foods'));
+  /* =======================================================
+     SUMMARY TAB SWITCHING
+     ======================================================= */
+  document.getElementById('sumDailyBtn').addEventListener('click', () => setSumMode('daily'));
+  document.getElementById('sumWeeklyBtn').addEventListener('click', () => setSumMode('weekly'));
+  document.getElementById('sumMonthlyBtn').addEventListener('click', () => setSumMode('monthly'));
+  function setSumMode(mode) {
+    sumMode = mode;
+    document.getElementById('sumDailyBtn').classList.toggle('active', mode === 'daily');
+    document.getElementById('sumWeeklyBtn').classList.toggle('active', mode === 'weekly');
+    document.getElementById('sumMonthlyBtn').classList.toggle('active', mode === 'monthly');
+    renderSummary();
+  }
+  /* =======================================================
+     SUMMARY RENDER
+     ======================================================= */
+  function renderSummary() {
+    const el = document.getElementById('summaryContent');
+    if (sumMode === 'daily') {
+      el.innerHTML = renderDailySummary();
+    } else if (sumMode === 'weekly') {
+      el.innerHTML = renderWeeklySummary();
+    } else {
+      el.innerHTML = renderMonthlySummary();
+    }
+  }
+  /* =======================================================
+     DAILY SUMMARY
+     ======================================================= */
+  function renderDailySummary() {
+    const total = dayTotal(selectedDate);
+    const list = allEntries[selectedDate] || [];
+    let goalDisplay = '—';
+    let goalLabel = 'No goal set';
+    if (dailyGoal !== null) {
+      if (total > dailyGoal) {
+        goalDisplay = Math.abs(dailyGoal - total);
+        goalLabel = 'Over';
+      } else {
+        goalDisplay = dailyGoal - total;
+        goalLabel = 'Left';
+      }
+    }
+    let html = `
+      <div class="avg-strip">
+        <div class="avg-item"><div class="avg-num">${total}</div><div class="avg-label">Total kcal</div></div>
+        <div class="avg-item"><div class="avg-num">${list.length}</div><div class="avg-label">Entries</div></div>
+        <div class="avg-item"><div class="avg-num">${goalDisplay}</div><div class="avg-label">${goalLabel}</div></div>
+      </div>
+    `;
+    html += `<div class="sum-card"><div class="sum-card-title">${fmtShort(selectedDate)}</div>`;
+    if (list.length === 0) {
+      html += `<div class="empty">No entries for this day.</div>`;
+    } else {
+      list.slice().sort((a, b) => sortKey(a) - sortKey(b)).forEach(e => {
+        html += `
+          <div class="ledger-row">
+            <span>${to12h(e.hour, e.min, e.ampm)} — ${escapeHtml(e.food)}</span>
+            <span class="ledger-kcal">${Number(e.kcal) || 0}</span>
+          </div>
+        `;
+      });
+    }
+    html += `</div>`;
+    return html;
+  }
+  /* =======================================================
+     WEEK CALCULATIONS
+     ======================================================= */
+  function getWeekDates(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const day = d.getDay();
+    const start = new Date(d);
+    start.setDate(d.getDate() - day);
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const cur = new Date(start);
+      cur.setDate(start.getDate() + i);
+      dates.push(dateToString(cur));
+    }
+    return dates;
+  }
+  /* =======================================================
+     WEEKLY SUMMARY
+     ======================================================= */
+  function renderWeeklySummary() {
+    const dates = getWeekDates(selectedDate);
+    const totals = dates.map(dayTotal);
+    const sum = totals.reduce((a, b) => a + b, 0);
+    const activeDays = totals.filter(t => t > 0).length;
+    const avg = activeDays ? Math.round(sum / activeDays) : 0;
+    let html = `
+      <div class="avg-strip">
+        <div class="avg-item"><div class="avg-num">${sum}</div><div class="avg-label">Week total</div></div>
+        <div class="avg-item"><div class="avg-num">${avg}</div><div class="avg-label">Daily avg</div></div>
+        <div class="avg-item"><div class="avg-num">${activeDays}/7</div><div class="avg-label">Days logged</div></div>
+      </div>
+    `;
+    html += `<div class="sum-card"><div class="sum-card-title">Week of ${fmtShort(dates[0])}</div>`;
+    dates.forEach((ds, i) => {
+      const t = totals[i];
+      let diffHtml = '';
+      if (dailyGoal !== null && t > 0) {
+        const diff = dailyGoal - t;
+        if (diff >= 0) {
+          diffHtml = `<span class="ledger-diff">${diff} left</span>`;
+        } else {
+          diffHtml = `<span class="ledger-diff over">${Math.abs(diff)} over</span>`;
+        }
+      }
+      html += `
+        <div class="ledger-row">
+          <span>
+            <span class="ledger-day">${weekdayName(ds)}</span>
+            <span class="ledger-date">${new Date(ds + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          </span>
+          <span>
+            <span class="ledger-kcal ${t === 0 ? 'zero' : ''}">${t} kcal</span>
+            ${diffHtml}
+          </span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    return html;
+  }
+  /* =======================================================
+     MONTHLY SUMMARY
+     ======================================================= */
+  function renderMonthlySummary() {
+    const selected = new Date(selectedDate + 'T00:00:00');
+    const year = selected.getFullYear();
+    const month = selected.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthDates = [];
+    for (let i = 1; i <= daysInMonth; i++) {
+      monthDates.push(year + '-' + pad(month + 1) + '-' + pad(i));
+    }
+    const totals = monthDates.map(dayTotal);
+    const sum = totals.reduce((a, b) => a + b, 0);
+    const activeDays = totals.filter(t => t > 0).length;
+    const avg = activeDays ? Math.round(sum / activeDays) : 0;
+    const monthLabel = selected.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    let html = `<select class="month-select" id="monthPicker">`;
+    for (let i = -6; i <= 6; i++) {
+      const md = new Date(year, month + i, 1);
+      const val = md.getFullYear() + '-' + pad(md.getMonth() + 1) + '-01';
+      const label = md.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const current = md.getFullYear() === year && md.getMonth() === month;
+      html += `<option value="${val}" ${current ? 'selected' : ''}>${label}</option>`;
+    }
+    html += `</select>`;
+    html += `
+      <div class="avg-strip">
+        <div class="avg-item"><div class="avg-num">${sum}</div><div class="avg-label">Month total</div></div>
+        <div class="avg-item"><div class="avg-num">${avg}</div><div class="avg-label">Daily avg</div></div>
+        <div class="avg-item"><div class="avg-num">${activeDays}/${daysInMonth}</div><div class="avg-label">Days logged</div></div>
+      </div>
+    `;
+    const weekdaySums = [0, 0, 0, 0, 0, 0, 0];
+    const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
+    Object.keys(allEntries).forEach(ds => {
+      const wd = new Date(ds + 'T00:00:00').getDay();
+      const t = dayTotal(ds);
+      if (t > 0) {
+        weekdaySums[wd] += t;
+        weekdayCounts[wd]++;
+      }
+    });
+    const weekdayAvgs = weekdaySums.map((s, i) => (weekdayCounts[i] ? Math.round(s / weekdayCounts[i]) : 0));
+    const maxAvg = Math.max(...weekdayAvgs, 1);
+    const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    html += `
+      <div class="sum-card">
+        <div class="sum-card-title">Eating pattern by weekday</div>
+        <div class="summary-note">Average calories on each weekday based on all logged days.</div>
+    `;
+    names.forEach((name, i) => {
+      const pct = Math.round((weekdayAvgs[i] / maxAvg) * 100);
+      html += `
+        <div class="weekday-bar-row">
+          <span class="weekday-bar-label">${name}</span>
+          <div class="weekday-bar-track"><div class="weekday-bar-fill" style="width:${pct}%"></div></div>
+          <span class="weekday-bar-num">${weekdayAvgs[i] ? weekdayAvgs[i] : '—'}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+    html += `<div class="sum-card"><div class="sum-card-title">${monthLabel} — day by day</div>`;
+    monthDates.forEach((ds, i) => {
+      const t = totals[i];
+      if (t === 0) return;
+      let diffHtml = '';
+      if (dailyGoal !== null) {
+        const diff = dailyGoal - t;
+        if (diff >= 0) {
+          diffHtml = `<span class="ledger-diff">${diff} left</span>`;
+        } else {
+          diffHtml = `<span class="ledger-diff over">${Math.abs(diff)} over</span>`;
+        }
+      }
+      html += `
+        <div class="ledger-row">
+          <span><span class="ledger-day">${weekdayName(ds)}</span><span class="ledger-date">${i + 1}</span></span>
+          <span><span class="ledger-kcal">${t} kcal</span>${diffHtml}</span>
+        </div>
+      `;
+    });
+    if (activeDays === 0) {
+      html += `<div class="empty">No entries logged this month.</div>`;
+    }
+    html += `</div>`;
+    return html;
+  }
+  document.addEventListener('change', e => {
+    if (e.target && e.target.id === 'monthPicker') {
+      const value = e.target.value;
+      if (!value) return;
+      selectedDate = value;
+      dateSelect.value = selectedDate;
+      renderSummary();
+    }
+  });
+  /* =======================================================
+     PROFILE TAB — BMR / TDEE / TARGET CALCULATOR
+     ======================================================= */
+  const ACTIVITY_MULT = {
+    sedentary: 1.2,
+    light: 1.375,
+    moderate: 1.55,
+    active: 1.725,
+    veryactive: 1.9
+  };
+  /* Deltas use ~7700 kcal per kg of bodyweight change. */
+  const GOAL_DELTA = {
+    maintain: 0,
+    mildloss: -275,
+    loss: -550,
+    extremeloss: -1100,
+    mildgain: 275,
+    gain: 550
+  };
+  let profSex = 'M';
+  const profSexM = document.getElementById('profSexM');
+  const profSexF = document.getElementById('profSexF');
+  profSexM.addEventListener('click', () => {
+    profSex = 'M';
+    profSexM.classList.add('active');
+    profSexF.classList.remove('active');
+  });
+  profSexF.addEventListener('click', () => {
+    profSex = 'F';
+    profSexF.classList.add('active');
+    profSexM.classList.remove('active');
+  });
+  function applyProfileToForm() {
+    if (!profile) return;
+    document.getElementById('profName').value = profile.name || '';
+    profSex = profile.sex === 'F' ? 'F' : 'M';
+    if (profSex === 'F') {
+      profSexF.click();
+    } else {
+      profSexM.click();
+    }
+    if (profile.age) document.getElementById('profAge').value = profile.age;
+    if (profile.weight) document.getElementById('profWeight').value = profile.weight;
+    if (profile.height) document.getElementById('profHeight').value = profile.height;
+    if (profile.activity) document.getElementById('profActivity').value = profile.activity;
+    if (profile.goal) document.getElementById('profGoal').value = profile.goal;
+    if (profile.lastResult) {
+      showProfileResults(profile.lastResult);
+    }
+  }
+  document.getElementById('profCalcBtn').addEventListener('click', calculateProfile);
+  function calculateProfile() {
+    const name = document.getElementById('profName').value.trim();
+    const age = Number(document.getElementById('profAge').value);
+    const weight = Number(document.getElementById('profWeight').value);
+    const height = Number(document.getElementById('profHeight').value);
+    const activity = document.getElementById('profActivity').value;
+    const goal = document.getElementById('profGoal').value;
+    if (!Number.isFinite(age) || age <= 0) {
+      flash(document.getElementById('profAge'));
+      return;
+    }
+    if (!Number.isFinite(weight) || weight <= 0) {
+      flash(document.getElementById('profWeight'));
+      return;
+    }
+    if (!Number.isFinite(height) || height <= 0) {
+      flash(document.getElementById('profHeight'));
+      return;
+    }
+    let bmr;
+    if (profSex === 'M') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    const mult = ACTIVITY_MULT[activity] || 1.2;
+    const tdee = bmr * mult;
+    const delta = GOAL_DELTA[goal] || 0;
+    const target = Math.round(tdee + delta);
+    const result = {
+      bmr: Math.round(bmr),
+      tdee: Math.round(tdee),
+      target: target
+    };
+    profile = {
+      name: name,
+      sex: profSex,
+      age: age,
+      weight: weight,
+      height: height,
+      activity: activity,
+      goal: goal,
+      lastResult: result
+    };
+    saveWithRetry(PROFILE_KEY, JSON.stringify(profile));
+    showProfileResults(result);
+  }
+  function showProfileResults(result) {
+    document.getElementById('profileResults').style.display = '';
+    document.getElementById('prBmr').textContent = result.bmr;
+    document.getElementById('prTdee').textContent = result.tdee;
+    document.getElementById('prTarget').textContent = result.target;
+    const caution = document.getElementById('prCaution');
+    const cautionText = document.getElementById('prCautionText');
+    const floor = profSex === 'F' ? 1200 : 1500;
+    if (result.target < floor) {
+      caution.style.display = 'flex';
+      cautionText.textContent =
+        'This target is quite low (under ' + floor + ' kcal/day). Very low intakes are hard to sustain and can affect your health — consider a milder goal, or check with a doctor or dietitian before going this low.';
+    } else {
+      caution.style.display = 'none';
+    }
+    const useBtn = document.getElementById('useGoalBtn');
+    useBtn.classList.remove('confirmed');
+    useBtn.textContent = 'Set as my daily goal in Log';
+  }
+  document.getElementById('useGoalBtn').addEventListener('click', () => {
+    if (!profile || !profile.lastResult) return;
+    dailyGoal = profile.lastResult.target;
+    saveWithRetry(GOAL_KEY, JSON.stringify(dailyGoal));
+    render();
+    const useBtn = document.getElementById('useGoalBtn');
+    useBtn.classList.add('confirmed');
+    useBtn.textContent = 'Goal set ✓ (' + dailyGoal + ' kcal)';
+  });
+  /* =======================================================
+     FOODS TAB — PHILIPPINE FOOD CALORIE REFERENCE
+     Values are approximate, compiled from typical recipe and
+     published nutrition-label estimates. They will vary by
+     brand, ingredients, and preparation method — use as a
+     quick reference, not an exact lab measurement.
+     Each entry: kcal for "refQty" of "unit".
+     unit 'g' -> shown/edited in grams (refQty usually 100).
+     other units -> shown/edited as a whole-number count of
+     that unit (piece, slice, pack, can, cup, sachet, tbsp).
+     ======================================================= */
+  const UNIT_LABELS = {
+    g: { one: 'g', many: 'g' },
+    piece: { one: 'piece', many: 'pieces' },
+    slice: { one: 'slice', many: 'slices' },
+    pack: { one: 'pack', many: 'packs' },
+    can: { one: 'can', many: 'cans' },
+    cup: { one: 'cup', many: 'cups' },
+    sachet: { one: 'sachet', many: 'sachets' },
+    tbsp: { one: 'tbsp', many: 'tbsp' }
+  };
+  function unitLabel(unit, qty) {
+    const u = UNIT_LABELS[unit] || UNIT_LABELS.g;
+    return qty === 1 ? u.one : u.many;
+  }
+  const FOOD_DB = [
+    { cat: 'Ulam / Viands', name: 'Chicken Adobo', kcal: 160, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Pork Adobo', kcal: 230, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Adobong Kangkong', kcal: 85, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Sinigang na Baboy (pork, w/ veg & broth)', kcal: 100, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Sinigang na Bangus', kcal: 85, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Chicken Tinola', kcal: 90, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Beef Nilaga', kcal: 120, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Kare-Kare (w/ peanut sauce)', kcal: 180, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Beef Caldereta', kcal: 200, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Chicken/Pork Afritada', kcal: 140, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Menudo', kcal: 150, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Bicol Express', kcal: 220, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Dinuguan', kcal: 180, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Pinakbet', kcal: 90, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Ginisang Monggo (w/ pork)', kcal: 110, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Laing', kcal: 160, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Chopsuey', kcal: 80, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Lechon Kawali', kcal: 400, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Lechon (roasted, w/ skin)', kcal: 260, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Crispy Pata', kcal: 380, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Sisig (pork, w/ mayo & egg)', kcal: 300, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Tocino (cooked)', kcal: 250, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Longganisa (cooked)', kcal: 300, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Beef Tapa (cooked)', kcal: 220, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Inihaw na Liempo (grilled pork belly)', kcal: 330, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Inihaw na Bangus (grilled milkfish)', kcal: 150, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Fried Chicken, Filipino-style (w/ skin)', kcal: 260, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Fried Tilapia', kcal: 130, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Ampalaya con Carne', kcal: 120, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Ginataang Gulay (vegetables in coconut milk)', kcal: 130, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Corned Beef (canned)', kcal: 230, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Luncheon Meat / Spam (fried slice)', kcal: 300, unit: 'g', refQty: 100 },
+    { cat: 'Ulam / Viands', name: 'Sardines in Tomato Sauce (canned)', kcal: 220, unit: 'can', refQty: 1 },
+    { cat: 'Rice & Noodles', name: 'White Rice, cooked', kcal: 130, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Sinangag (garlic fried rice)', kcal: 190, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Lugaw / Rice Porridge (plain)', kcal: 60, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Pancit Canton (home-cooked)', kcal: 170, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Pancit Bihon', kcal: 140, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Filipino-style Spaghetti (sweet sauce)', kcal: 190, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Pandesal', kcal: 275, unit: 'g', refQty: 100 },
+    { cat: 'Rice & Noodles', name: 'Sliced White Bread (~28g/slice)', kcal: 77, unit: 'slice', refQty: 1 },
+    { cat: 'Snacks & Street Food', name: 'Lumpiang Shanghai (fried)', kcal: 280, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Lumpiang Sariwa (fresh)', kcal: 110, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Banana Cue', kcal: 250, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Turon', kcal: 300, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Kwek-kwek (fried quail egg)', kcal: 250, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Fish Balls (fried)', kcal: 230, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Isaw (grilled)', kcal: 200, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Puto (rice cake)', kcal: 200, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Bibingka', kcal: 210, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Suman', kcal: 180, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Taho', kcal: 90, unit: 'g', refQty: 100 },
+    { cat: 'Snacks & Street Food', name: 'Halo-halo (mixed, no ice cream)', kcal: 120, unit: 'g', refQty: 100 },
+    { cat: 'Packaged & Pantry', name: 'Lucky Me Pancit Canton, Original', kcal: 290, unit: 'pack', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Lucky Me Instant Mami Noodles', kcal: 225, unit: 'pack', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Century Tuna Flakes in Oil (drained)', kcal: 200, unit: 'can', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Instant Coffee 3-in-1 Sachet', kcal: 85, unit: 'sachet', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Peanut Butter', kcal: 95, unit: 'tbsp', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Regular Softdrink, 1 can (330ml)', kcal: 140, unit: 'can', refQty: 1 },
+    { cat: 'Packaged & Pantry', name: 'Fresh Milk, 1 cup (244ml)', kcal: 150, unit: 'cup', refQty: 1 },
+    { cat: 'Fruits & Basics', name: 'Banana (saba, boiled)', kcal: 115, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Banana (lakatan/latundan)', kcal: 90, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Mango (ripe)', kcal: 60, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Papaya', kcal: 40, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Pineapple', kcal: 50, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Watermelon', kcal: 30, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Hard-Boiled Egg (medium)', kcal: 78, unit: 'piece', refQty: 1 },
+    { cat: 'Fruits & Basics', name: 'Fried Egg (w/ oil)', kcal: 95, unit: 'piece', refQty: 1 },
+    { cat: 'Fruits & Basics', name: 'Hotdog (~45g/piece)', kcal: 140, unit: 'piece', refQty: 1 },
+    { cat: 'Fruits & Basics', name: 'Chicken Breast (skinless, cooked)', kcal: 165, unit: 'g', refQty: 100 },
+    { cat: 'Fruits & Basics', name: 'Pork (lean, cooked)', kcal: 240, unit: 'g', refQty: 100 }
+  ];
+  const foodsListEl = document.getElementById('foodsList');
+  const foodsSearchEl = document.getElementById('foodsSearch');
+  function buildFoodsList() {
+    renderFoodsList('');
+  }
+  function renderFoodsList(filter) {
+    const q = (filter || '').trim().toLowerCase();
+    const filtered = FOOD_DB.filter(f => f.name.toLowerCase().includes(q));
+    if (filtered.length === 0) {
+      foodsListEl.innerHTML = `<div class="foods-empty">No matching foods here. Try the search links below for a wider database, or just log your own kcal value directly in the Log tab.</div>`;
+      return;
+    }
+    let html = '';
+    let lastCat = null;
+    filtered.forEach((f) => {
+      if (f.cat !== lastCat) {
+        html += `<div class="foods-cat-title">${escapeHtml(f.cat)}</div>`;
+        lastCat = f.cat;
+      }
+      const perLabel = f.unit === 'g'
+        ? (f.kcal) + ' kcal/' + f.refQty + 'g'
+        : f.kcal + ' kcal / ' + unitLabel(f.unit, f.refQty);
+      html += `
+        <div class="food-row" data-kcal="${f.kcal}" data-refqty="${f.refQty}" data-unit="${f.unit}" data-name="${escapeHtml(f.name)}">
+          <div class="food-row-top">
+            <span class="food-name">${escapeHtml(f.name)}</span>
+            <span class="food-per100">${perLabel}</span>
+          </div>
+          <div class="food-row-bottom">
+            <span class="food-grams-label">${f.unit === 'g' ? 'grams' : 'qty'}</span>
+            <input type="number" class="food-unit-input" value="${f.refQty}" min="${f.unit === 'g' ? 1 : 0}" step="${f.unit === 'g' ? 1 : 1}">
+            <span class="food-kcal-result">${f.kcal} kcal</span>
+            <button class="food-add-btn">Use</button>
+          </div>
+        </div>
+      `;
+    });
+    foodsListEl.innerHTML = html;
+  }
+  foodsSearchEl.addEventListener('input', () => {
+    renderFoodsList(foodsSearchEl.value);
+  });
+  function foodRowKcal(row) {
+    const kcalRef = Number(row.getAttribute('data-kcal'));
+    const refQty = Number(row.getAttribute('data-refqty')) || 1;
+    let qty = Number(row.querySelector('.food-unit-input').value);
+    if (!Number.isFinite(qty) || qty < 0) qty = 0;
+    return { qty: qty, kcal: Math.round((kcalRef * qty) / refQty) };
+  }
+  foodsListEl.addEventListener('input', e => {
+    if (!e.target.classList.contains('food-unit-input')) return;
+    const row = e.target.closest('.food-row');
+    const result = foodRowKcal(row);
+    row.querySelector('.food-kcal-result').textContent = result.kcal + ' kcal';
+  });
+  foodsListEl.addEventListener('click', e => {
+    if (!e.target.classList.contains('food-add-btn')) return;
+    const row = e.target.closest('.food-row');
+    const name = row.getAttribute('data-name');
+    const unit = row.getAttribute('data-unit');
+    const result = foodRowKcal(row);
+    const qtyLabel = unit === 'g'
+      ? result.qty + 'g'
+      : result.qty + ' ' + unitLabel(unit, result.qty);
+    document.getElementById('foodName').value = name + ' (' + qtyLabel + ')';
+    document.getElementById('kcalInput').value = result.kcal;
+    activateTab('log');
+    document.getElementById('kcalInput').focus();
+  });
+  /* =======================================================
+     USDA FOODDATA CENTRAL SEARCH
+     ======================================================= */
+  const usdaSearchInput = document.getElementById('usdaSearchInput');
+  const usdaSearchBtn = document.getElementById('usdaSearchBtn');
+  const usdaStatusEl = document.getElementById('usdaStatus');
+  const usdaResultsEl = document.getElementById('usdaResults');
+  function getEnergyKcal(foodNutrients) {
+    if (!Array.isArray(foodNutrients)) return null;
+    const hit = foodNutrients.find(n =>
+      n.nutrientId === 1008 ||
+      n.nutrientNumber === '208' ||
+      (n.nutrientName && n.nutrientName.toLowerCase() === 'energy' && (n.unitName || '').toLowerCase() === 'kcal')
+    );
+    if (!hit) return null;
+    const val = hit.value !== undefined ? hit.value : hit.amount;
+    return Number.isFinite(Number(val)) ? Number(val) : null;
+  }
+  async function searchUsda() {
+    const query = usdaSearchInput.value.trim();
+    if (!query) {
+      flash(usdaSearchInput);
+      return;
+    }
+    if (!USDA_API_KEY || USDA_API_KEY === 'YOUR_USDA_API_KEY_HERE') {
+      usdaStatusEl.textContent = 'No USDA API key set yet — paste your free key into USDA_API_KEY near the top of the script.';
+      usdaStatusEl.className = 'usda-status error';
+      usdaResultsEl.innerHTML = '';
+      return;
+    }
+    usdaSearchBtn.disabled = true;
+    usdaStatusEl.textContent = 'Searching…';
+    usdaStatusEl.className = 'usda-status';
+    usdaResultsEl.innerHTML = '';
+    try {
+      const url = 'https://api.nal.usda.gov/fdc/v1/foods/search?api_key=' +
+        encodeURIComponent(USDA_API_KEY) +
+        '&query=' + encodeURIComponent(query) +
+        '&pageSize=15';
+      const res = await fetch(url);
+      if (!res.ok) {
+        if (res.status === 403) throw new Error('USDA API key was rejected (403) — check the key is correct and active.');
+        if (res.status === 429) throw new Error('USDA API rate limit reached — try again shortly.');
+        throw new Error('USDA search failed (status ' + res.status + ').');
+      }
+      const data = await res.json();
+      const foods = Array.isArray(data.foods) ? data.foods : [];
+      if (foods.length === 0) {
+        usdaStatusEl.textContent = 'No results for "' + query + '".';
+        return;
+      }
+      renderUsdaResults(foods);
+      const shown = usdaResultsEl.querySelectorAll('.food-row').length;
+      usdaStatusEl.textContent = shown
+        ? shown + ' result' + (shown === 1 ? '' : 's') + ' from USDA FoodData Central (per 100g).'
+        : 'Found results, but none had usable calorie data.';
+    } catch (err) {
+      console.error('USDA search error:', err);
+      usdaStatusEl.textContent = err.message || 'Could not reach USDA FoodData Central. Check your connection and try again.';
+      usdaStatusEl.className = 'usda-status error';
+    } finally {
+      usdaSearchBtn.disabled = false;
+    }
+  }
+  function renderUsdaResults(foods) {
+    let html = '';
+    foods.forEach(f => {
+      const kcal100 = getEnergyKcal(f.foodNutrients);
+      if (kcal100 === null) return;
+      const name = f.description || 'Unknown food';
+      const brandSuffix = f.brandOwner ? ' — ' + f.brandOwner : '';
+      html += `
+        <div class="food-row" data-kcal="${kcal100}" data-refqty="100" data-unit="g" data-name="${escapeHtml(name)}">
+          <div class="food-row-top">
+            <span class="food-name">${escapeHtml(name)}${escapeHtml(brandSuffix)}</span>
+            <span class="food-per100">${Math.round(kcal100)} kcal/100g</span>
+          </div>
+          <div class="food-row-bottom">
+            <span class="food-grams-label">grams</span>
+            <input type="number" class="food-unit-input" value="100" min="1" step="1">
+            <span class="food-kcal-result">${Math.round(kcal100)} kcal</span>
+            <button class="food-add-btn">Use</button>
+          </div>
+        </div>
+      `;
+    });
+    usdaResultsEl.innerHTML = html;
+  }
+  usdaSearchBtn.addEventListener('click', searchUsda);
+  usdaSearchInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      searchUsda();
+    }
+  });
+  usdaResultsEl.addEventListener('input', e => {
+    if (!e.target.classList.contains('food-unit-input')) return;
+    const row = e.target.closest('.food-row');
+    const result = foodRowKcal(row);
+    row.querySelector('.food-kcal-result').textContent = result.kcal + ' kcal';
+  });
+  usdaResultsEl.addEventListener('click', e => {
+    if (!e.target.classList.contains('food-add-btn')) return;
+    const row = e.target.closest('.food-row');
+    const name = row.getAttribute('data-name');
+    const unit = row.getAttribute('data-unit');
+    const result = foodRowKcal(row);
+    const qtyLabel = unit === 'g' ? result.qty + 'g' : result.qty + ' ' + unitLabel(unit, result.qty);
+    document.getElementById('foodName').value = name + ' (' + qtyLabel + ')';
+    document.getElementById('kcalInput').value = result.kcal;
+    activateTab('log');
+    document.getElementById('kcalInput').focus();
+  });
+  /* =======================================================
+     KEYBOARD SHORTCUT
+     ======================================================= */
+  document.addEventListener('keydown', e => {
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey &&
+      (document.activeElement === document.getElementById('foodName') ||
+        document.activeElement === document.getElementById('kcalInput'))
+    ) {
+      e.preventDefault();
+      addEntry();
+    }
+  });
+  /* =======================================================
+     INITIALIZE
+     ======================================================= */
+  
+// === Trial Mode ===
+const TRIAL_DAYS=7;
+function trialInit(){
+ let install=localStorage.getItem('kcal_install_date');
+ if(!install){install=Date.now();localStorage.setItem('kcal_install_date',install);}
+ const remaining=Math.ceil((TRIAL_DAYS*86400000-(Date.now()-Number(install)))/86400000);
+ const banner=document.getElementById('trialText');
+ if(banner) banner.textContent=remaining>0?`Trial: ${remaining} day${remaining===1?'':'s'} left`:'Trial expired';
+ if(remaining<=0){document.getElementById('trialLock').style.display='flex';}
+}
+document.getElementById('buyLifetimeBtn').onclick=()=>window.open('https://YOUR-CHECKOUT-URL','_blank');
+trialInit();
+
+loadData();
+})();
+</script>
+<!-- =======================================================
+     SERVICE WORKER
+     ======================================================= -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('service-worker.js')
+      .then(registration => {
+        console.log('Kcal Log service worker registered:', registration.scope);
+      })
+      .catch(err => {
+        console.error('Service worker registration failed:', err);
+      });
+  });
+}
+</script>
+</body>
+</html>
