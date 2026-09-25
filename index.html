@@ -990,7 +990,7 @@ select:focus {
 <body>
 <div class="app">
 
-<div id="trialBanner"><span id="trialText">Trial</span><strong>₱49 Lifetime</strong></div>
+<div id="trialBanner"><span id="trialText">Trial</span><strong>₱79 Lifetime</strong></div>
 <div id="trialLock"><div class="card"><h2>Your Trial Has Ended</h2><p>Pay one time and get access to the app for a lifetime.</p><button id="buyLifetimeBtn">Buy & Unlock Lifetime Access</button><p id="checkoutStatus" class="checkout-status" role="status" aria-live="polite" hidden></p></div></div>
 
   <div class="eyebrow">Food log</div>
@@ -2379,15 +2379,21 @@ select:focus {
   
 // === Trial Mode ===
 const TRIAL_DAYS=7;
+// Version the trial key once to give existing testers a fresh seven-day period.
+// Their calorie entries and other app data are stored under separate keys and remain intact.
+const TRIAL_START_KEY='kcal_trial_start_date_v2';
 function trialInit(){
- let install=localStorage.getItem('kcal_install_date');
- if(!install){install=Date.now();localStorage.setItem('kcal_install_date',install);}
- const remaining=Math.ceil((TRIAL_DAYS*86400000-(Date.now()-Number(install)))/86400000);
+ let install=Number(localStorage.getItem(TRIAL_START_KEY));
+ if(!Number.isFinite(install)||install<=0){
+   install=Date.now();
+   localStorage.setItem(TRIAL_START_KEY,String(install));
+ }
+ const remaining=Math.ceil((TRIAL_DAYS*86400000-(Date.now()-install))/86400000);
  const banner=document.getElementById('trialText');
  if(banner) banner.textContent=remaining>0?`Trial: ${remaining} day${remaining===1?'':'s'} left`:'Trial expired';
  if(remaining<=0){document.getElementById('trialLock').style.display='flex';}
 }
-const LIFETIME_CHECKOUT_URL = ''; // Set the real HTTPS payment checkout URL before publishing.
+const LIFETIME_CHECKOUT_URL = 'https://pm.link/org-6z51H3v3b6TE6rktHCkdcMBC/99KO8RK'; // PayMongo checkout URL supplied by the owner.
 function configureLifetimeCheckout() {
   const buyButton = document.getElementById('buyLifetimeBtn');
   const status = document.getElementById('checkoutStatus');
