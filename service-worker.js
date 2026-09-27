@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kcal-log-v1';
+const CACHE_NAME = 'kcal-log-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -7,47 +7,39 @@ const ASSETS_TO_CACHE = [
   './icon-512.png'
 ];
 
-// Install Event: Cache essential assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
   );
   self.skipWaiting();
 });
 
-// Activate Event: Cleanup stale caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
-      );
-    })
+    caches.keys().then(names =>
+      Promise.all(names.filter(name => name !== CACHE_NAME).map(name => caches.delete(name)))
+    )
   );
   self.clients.claim();
 });
 
-// Fetch Event: Network-first approach with cache fallback
 self.addEventListener('fetch', (event) => {
+  const request = event.request;
+
+  // Never cache API responses or non-GET requests.
+  if (request.method !== 'GET' || new URL(request.url).pathname.startsWith('/api/')) {
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
+    fetch(request)
+      .then(response => {
         if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
         }
         return response;
       })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+      .catch(() => caches.match(request))
   );
 });
