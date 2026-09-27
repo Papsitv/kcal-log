@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Local application data
+backend/codes.json
+
+# Logs and local files
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
