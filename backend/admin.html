@@ -57,6 +57,18 @@
 
   <script>
     const el = id => document.getElementById(id);
+    function clearAndText(target, value) {
+      target.replaceChildren(document.createTextNode(String(value)));
+    }
+    function showText(value) {
+      clearAndText(el('generated'), value);
+    }
+    function showGenerated(data) {
+      const pre = document.createElement('pre');
+      pre.textContent = 'CODE: ' + data.code + '\\nID: ' + data.id + '\\nExpires: ' + new Date(data.expiresAt).toLocaleString();
+      el('generated').replaceChildren(pre);
+    }
+
     el('gen').addEventListener('click', async ()=>{
       const token = el('admin-token').value.trim();
       if(!token){ alert('ADMIN_TOKEN required'); return; }
@@ -64,9 +76,9 @@
       try{
         const res = await fetch('/api/generate', { method:'POST', headers:{ 'Content-Type':'application/json', 'x-admin-token': token }, body: JSON.stringify(body) });
         const data = await res.json();
-        if(res.ok){ el('generated').innerHTML = `<pre>CODE: ${data.code}\nID: ${data.id}\nExpires: ${new Date(data.expiresAt).toLocaleString()}</pre>`; }
-        else { el('generated').innerHTML = `<pre>ERROR: ${data.error||JSON.stringify(data)}</pre>`; }
-      }catch(e){ el('generated').innerHTML = `<pre>Network error\n${e}</pre>` }
+        if(res.ok){ showGenerated(data); }
+        else { showText(data.error || JSON.stringify(data)); }
+      }catch(e){ showText('Network error') }
     });
 
     el('refresh').addEventListener('click', async ()=>{
@@ -83,8 +95,8 @@
             html += '</table>';
             el('codes-list').innerHTML = html;
           }
-        } else { el('codes-list').innerHTML = `<pre>ERROR: ${JSON.stringify(data)}</pre>` }
-      }catch(e){ el('codes-list').innerHTML = `<pre>Network error\n${e}</pre>` }
+        } else { showText(JSON.stringify(data)) }
+      }catch(e){ showText(JSON.stringify({error:'Network error'})) }
     });
 
       async function refreshRequests(){
@@ -110,12 +122,12 @@
                 const body = { buyerName: req.buyerName, buyerPhone: req.buyerPhone, amount: req.amount };
                 const res2 = await fetch('/api/generate', { method:'POST', headers:{ 'Content-Type':'application/json','x-admin-token': token }, body: JSON.stringify({ ...body, expiresInDays:7, requestId: id }) });
                 const j2 = await res2.json();
-                if(res2.ok){ el('generated').innerHTML = `<pre>CODE: ${j2.code}\nID: ${j2.id}\nExpires: ${new Date(j2.expiresAt).toLocaleString()}</pre>`; refreshRequests(); }
-                else el('generated').innerHTML = `<pre>ERROR: ${JSON.stringify(j2)}</pre>`;
+                if(res2.ok){ showGenerated(j2);; refreshRequests(); }
+                else showText(JSON.stringify(j2));
               }));
             }
           }
-        }catch(e){ el('requests-list').innerHTML = `<pre>Network error\n${e}</pre>` }
+        }catch(e){ showText(JSON.stringify({error:'Network error'})) }
       }
 
       // refresh requests when page loads
